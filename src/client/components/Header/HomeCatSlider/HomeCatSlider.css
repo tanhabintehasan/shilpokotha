@@ -1,0 +1,58 @@
+/* Container position */
+.HomeCatSwiper {
+  position: relative !important;
+  height: 200px; /* ensures buttons are positioned relative to slider */
+}
+
+/* Small circular navigation buttons */
+.HomeCatSwiper .swiper-button-next,
+.HomeCatSwiper .swiper-button-prev {
+  position: absolute !important; /* absolute positioning relative to .HomeCatSwiper */
+  top: 50% !important; /* vertical center */
+  transform: translateY(-50%) !important;
+  width: 32px !important; /* button size */
+  height: 32px !important;
+  background-color: #eaddca !important; /* button background */
+  border-radius: 50% !important; /* circular */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+  color: #000 !important; /* arrow color for text or SVG */
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  cursor: pointer;
+}
+
+/* Position left and right buttons slightly outside the slider */
+.HomeCatSwiper .swiper-button-prev {
+  left: -16px !important; /* slightly outside */
+}
+
+.HomeCatSwiper .swiper-button-next {
+  right: -16px !important; /* slightly outside */
+}
+
+/* Arrow icons (text or pseudo-elements) */
+.HomeCatSwiper .swiper-button-next::after,
+.HomeCatSwiper .swiper-button-prev::after {
+  font-size: 12px !important; /* smaller arrow */
+  color: #000 !important; /* force black */
+  font-weight: bold !important;
+}
+
+/* Handle SVG arrows if Swiper uses them */
+.HomeCatSwiper .swiper-button-next svg,
+.HomeCatSwiper .swiper-button-prev svg {
+  width: 12px !important;
+  height: 12px !important;
+  fill: #000 !important; /* make arrow black */
+}
+
+/* Hover effect */
+.HomeCatSwiper .swiper-button-next:hover,
+.HomeCatSwiper .swiper-button-prev:hover {
+  background-color: #d8c9b3 !important;
+}
+.HomeCatSwiper .swiper-slide img {
+  object-fit: contain !important; /* Ensures FULL image is visible */
+}
