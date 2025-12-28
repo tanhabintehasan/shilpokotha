@@ -1,14 +1,10 @@
 import React from "react";
 import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
-
-// Styles
 import "./App.css";
 
-// Contexts - Now using both Shop (Wishlist) and Cart
 import { ShopProvider } from "./Context/ShopContext"; 
-import { CartProvider } from "./Context/CartContext"; // Import your new Cart file
+import { CartProvider } from "./Context/CartContext";
 
-// Components & Pages
 import Header from "./client/components/Header";
 import Home from "./client/Pages/Home";
 import ProductListing from "./client/components/ProductListing";
@@ -22,11 +18,8 @@ import CheckOut from "./client/Pages/CheckOut";
 import MyAccount from "./client/Pages/MyAccount";
 import MyOrders from "./client/Pages/MyOder";
 
-// Admin Components
 import AdminDashboard from "./admin/components/AdminDashboard";
 import AdminLogin from "./admin/components/AdminLogin";
-
-// Guards
 import UserProtectedRoute from "./client/components/UserProtectedRoute";
 import AdminRoute from "./admin/components/AdminRoute"; 
 
@@ -53,13 +46,11 @@ const ContentWrapper = ({ children }) => {
 
 function App() {
   return (
-    // Wrap with ShopProvider first, then CartProvider
-    <ShopProvider> 
-      <CartProvider>
-        <BrowserRouter>
+    <BrowserRouter> 
+      <ShopProvider> 
+        <CartProvider>
           <ContentWrapper>
             <Routes>
-              {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/productlisting" element={<ProductListing />} />
@@ -68,25 +59,24 @@ function App() {
               <Route path="/cart" element={<CartPage />} />
               <Route path="/wishlist" element={<WishPage />} />
 
-              {/* Protected User Routes */}
               <Route element={<UserProtectedRoute />}>
                 <Route path="/myaccount" element={<MyAccount />} />
                 <Route path="/myoder" element={<MyOrders />} />
                 <Route path="/checkout" element={<CheckOut />} />
               </Route>
 
-              {/* Admin Routes */}
               <Route path="/adminlogin" element={<AdminLogin />} />
               <Route element={<AdminRoute />}>
                 <Route path="/admindashboard/*" element={<AdminDashboard />} />
               </Route>
 
-              <Route path="*" element={<Navigate to="/" replace />} />
+              {/* Prevent Loop: Show a 404 text instead of navigating to / during debugging */}
+              <Route path="*" element={<div className="p-10 text-center">404 - Page Not Found</div>} />
             </Routes>
           </ContentWrapper>
-        </BrowserRouter>
-      </CartProvider>
-    </ShopProvider>
+        </CartProvider>
+      </ShopProvider>
+    </BrowserRouter>
   );
 }
 
