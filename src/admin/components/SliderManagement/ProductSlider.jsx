@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Switch, Table, TableBody, TableCell, TableHead, TableRow, Paper, Chip, CircularProgress } from "@mui/material";
 import { MdOutlineStars } from "react-icons/md";
+import axiosInstance from '../api/axiosInstance';
 
 const ProductSlider = () => {
   const [products, setProducts] = useState([]);

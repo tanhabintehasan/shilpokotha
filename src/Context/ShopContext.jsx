@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import axiosInstance from '../api/axiosInstance';
 
 export const ShopContext = createContext();
 

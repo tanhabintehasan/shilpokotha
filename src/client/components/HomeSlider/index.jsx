@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
+import axiosInstance from '../api/axiosInstance';
 
 // Import Swiper styles
 import "swiper/css";

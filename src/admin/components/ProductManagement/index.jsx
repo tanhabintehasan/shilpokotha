@@ -4,6 +4,7 @@ import CommonTable from "../Ui/CommonTable";
 import {
   PlusCircle, Package, X, Search, UploadCloud, Layers,
 } from "lucide-react";
+import axiosInstance from '../api/axiosInstance';
 
 const ProductManagement = () => {
   // --- CONFIG ---

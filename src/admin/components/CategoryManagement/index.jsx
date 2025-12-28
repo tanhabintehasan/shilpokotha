@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CommonTable from "../Ui/CommonTable";
 import { PlusCircle, X, LayoutGrid, Eye, Loader2, AlertCircle } from "lucide-react";
+import axiosInstance from '../api/axiosInstance';
 
 const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
@@ -25,7 +26,7 @@ const CategoryManagement = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await axiosaxiosInstance.get.get(API_BASE);
+      const res = await axiosInstance.get(API_BASE);
       
       // Safety check for data structure
       const finalData = Array.isArray(res.data) ? res.data : [];

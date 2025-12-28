@@ -10,6 +10,7 @@ import ProductsSlider from "../../components/ProductsSlider/Index";
 import SecondBanner from "../../components/SecondBanner";
 import BlogItem from "../../components/BlogItem";
 import HeroBanner from "../../components/HeroBanner";
+import axiosInstance from '../api/axiosInstance';
 
 const Home = () => {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
@@ -34,11 +35,11 @@ const Home = () => {
     try {
       setLoading(true);
       const [homeRes, catRes, productRes, bannerRes, designRes] = await Promise.all([
-        axioaxiosInstance.gets.get(`${BACKEND_URL}/api/product-slider/active/homeslide`),
-        axioaxiosInstance.gets.get(`${BACKEND_URL}/api/product-slider/active/homecatslide`),
-        axaxiosInstance.getios.get(`${BACKEND_URL}/api/product-slider/active/productslide`),
-        axiaxiosInstance.getos.get(`${BACKEND_URL}/api/product-slider/active/bannerslide`),
-        axios.axiosInstance.getget(`${BACKEND_URL}/api/product-slider/active/design`),
+       axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/homeslide`),
+        axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/homecatslide`),
+        axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/productslide`),
+        axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/bannerslide`),
+        axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/design`),
       ]);
 
       setHomeSlides(ensureArray(homeRes.data));

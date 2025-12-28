@@ -4,10 +4,11 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import axiosInstance from '../api/axiosInstance';
 
 import ProductItem from "../ProductItem/Index";
 import ProductModal from "../ProductModal/index";
-
+import axiosInstance from '../api/axiosInstance';
 const ProductsSlider = () => {
   const [products, setProducts] = useState([]);
   const [isOpenModal, setIsOpenModal] = useState(false);

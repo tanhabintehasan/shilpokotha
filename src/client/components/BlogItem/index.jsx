@@ -3,6 +3,7 @@ import axios from "axios";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from '../../../utils/axiosInstance';
 
 // Swiper Styles
 import "swiper/css";
@@ -33,7 +34,7 @@ const BlogItem = () => {
     const fetchBlogs = async () => {
       try {
         setLoading(true);
-        const res = await axioaxiosInstance.gets.get(`${BACKEND_URL}/api/products?designType=blog`);
+        const res = await axiosInstance.get(`${BACKEND_URL}/api/products?designType=blog`);
         
         // Defensive data check
         const data = Array.isArray(res.data) 

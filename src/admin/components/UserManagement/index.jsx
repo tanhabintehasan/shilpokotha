@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios"; // Import axios
 import CommonTable from "../Ui/CommonTable";
 import { UserPlus, Shield, User, Mail, Calendar, Loader2 } from "lucide-react";
+import axiosInstance from '../api/axiosInstance';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);

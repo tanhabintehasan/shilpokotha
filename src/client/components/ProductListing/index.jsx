@@ -9,6 +9,7 @@ import { useCart } from "../../../Context/CartContext"; // ADDED: Import useCart
 import { IoGrid } from "react-icons/io5";
 import { MdOutlineFormatListBulleted } from "react-icons/md";
 import Pagination from "@mui/material/Pagination";
+import axiosInstance from '../api/axiosInstance';
 
 const ProductListing = () => {
   const navigate = useNavigate();

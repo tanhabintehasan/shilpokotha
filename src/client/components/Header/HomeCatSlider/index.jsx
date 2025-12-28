@@ -3,6 +3,7 @@ import axios from "axios";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { Link } from "react-router-dom";
+import axiosInstance from '../api/axiosInstance';
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -28,7 +29,7 @@ const HomeCatSlider = () => {
     let isMounted = true;
     setLoading(true);
 
-    axaxiosInstance.getios.get(`${BACKEND_URL}/api/product-slider/active/homecatslide`)
+    axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/homecatslide`)
       .then(res => {
         if (isMounted) {
           // DEBUG: This will help us see the exact structure in production logs
