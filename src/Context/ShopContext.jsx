@@ -6,7 +6,7 @@ export const ShopContext = createContext();
 export const ShopProvider = ({ children }) => {
   const [wishlistItems, setWishlistItems] = useState([]); 
   const [isWishOpen, setIsWishOpen] = useState(false);
-  const BACKEND_URL = "";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
 
   const getUserAuth = useCallback(() => {
     const rawData = localStorage.getItem("userInfo");
@@ -22,9 +22,10 @@ export const ShopProvider = ({ children }) => {
 
   const fetchWishlist = useCallback(async () => {
     const { userId, config } = getUserAuth();
-    if (userId && config.headers.Authorization) {
+    if (userId && config.headers?.Authorization) {
       try {
         const { data } = await axios.get(`${BACKEND_URL}/api/wishlist/${userId}`, config);
+        // Robust extraction: Handle array vs object responses
         const items = Array.isArray(data) ? data : (data?.items || []);
         setWishlistItems(items);
       } catch (err) { 
@@ -32,39 +33,52 @@ export const ShopProvider = ({ children }) => {
         setWishlistItems([]); 
       }
     }
-  }, [getUserAuth]);
+  }, [getUserAuth, BACKEND_URL]);
 
   useEffect(() => { fetchWishlist(); }, [fetchWishlist]);
 
   const addToWishlist = async (product) => {
+    if (!product) return;
     const { userId, config } = getUserAuth();
     if (!userId) return alert("Please login first");
     
     setWishlistItems(prev => {
-      const exists = prev.some(w => (w.productId?._id || w.productId || w._id) === product._id);
-      return exists ? prev : [...prev, { ...product, productId: product._id }];
+      const currentItems = Array.isArray(prev) ? prev : [];
+      const exists = currentItems.some(w => {
+        const wishId = w.productId?._id || w.productId || w._id;
+        return wishId === product._id;
+      });
+      return exists ? currentItems : [...currentItems, { ...product, productId: product._id }];
     });
 
-    if (config.headers.Authorization) {
+    if (config.headers?.Authorization) {
       try { 
         await axios.post(`${BACKEND_URL}/api/wishlist/add`, { userId, productId: product._id }, config); 
-        fetchWishlist(); 
       } catch (err) { console.error(err.message); }
     }
   };
 
   const removeFromWishlist = async (id) => {
-    setWishlistItems(prev => prev.filter(i => (i.productId?._id || i.productId || i._id) !== id));
+    setWishlistItems(prev => {
+      const currentItems = Array.isArray(prev) ? prev : [];
+      return currentItems.filter(i => {
+        const wishId = i.productId?._id || i.productId || i._id;
+        return wishId !== id;
+      });
+    });
+
     const { userId, config } = getUserAuth();
-    if (userId && config.headers.Authorization) {
-      try { await axios.delete(`${BACKEND_URL}/api/wishlist/remove?userId=${userId}&productId=${id}`, config); }
-      catch (err) { console.error(err.message); }
+    if (userId && config.headers?.Authorization) {
+      try { 
+        await axios.delete(`${BACKEND_URL}/api/wishlist/remove?userId=${userId}&productId=${id}`, config); 
+      } catch (err) { console.error(err.message); }
     }
   };
 
   return (
     <ShopContext.Provider value={{ 
-      wishlistItems, addToWishlist, removeFromWishlist, isWishOpen, setIsWishOpen, getUserAuth 
+      wishlistItems: Array.isArray(wishlistItems) ? wishlistItems : [], 
+      addToWishlist, removeFromWishlist, isWishOpen, setIsWishOpen, getUserAuth 
     }}>
       {children}
     </ShopContext.Provider>

@@ -6,12 +6,12 @@ export const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const BACKEND_URL = "";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
 
-  // --- NEW: TOTAL AMOUNT CALCULATION ---
-  // This calculates the total price of all items in the cart
+  // Crash-proof Total Calculation
   const totalAmount = useMemo(() => {
-    return cartItems.reduce((acc, item) => {
+    const items = Array.isArray(cartItems) ? cartItems : [];
+    return items.reduce((acc, item) => {
       const price = Number(item.price) || 0;
       const qty = Number(item.qty) || 0;
       return acc + (price * qty);
@@ -27,13 +27,10 @@ export const CartProvider = ({ children }) => {
     try {
       const userInfo = JSON.parse(rawData);
       const token = userInfo?.token;
-      if (token && token.split('.').length === 3) {
-        return {
-          userId: userInfo?._id,
-          config: { headers: { Authorization: `Bearer ${token}` } },
-        };
-      }
-      return { userId: userInfo?._id, config: { headers: {} } };
+      return {
+        userId: userInfo?._id,
+        config: { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+      };
     } catch (e) {
       return { userId: null, config: { headers: {} } };
     }
@@ -41,32 +38,28 @@ export const CartProvider = ({ children }) => {
 
   const fetchCart = useCallback(async () => {
     const { userId, config } = getUserAuth();
-    if (userId && config.headers.Authorization) {
+    if (userId && config.headers?.Authorization) {
       try {
         const { data } = await axios.get(`${BACKEND_URL}/api/cart/${userId}`, config);
-        setCartItems(data.items || []);
+        // Ensure we extract the array regardless of response structure
+        const items = Array.isArray(data) ? data : (data?.items || []);
+        setCartItems(items);
       } catch (err) {
         console.error("Cart fetch error:", err.message);
+        setCartItems([]);
       }
     }
-  }, [getUserAuth]);
+  }, [getUserAuth, BACKEND_URL]);
 
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
 
-  // --- NEW: CLEAR CART FUNCTION ---
-  // Used after a successful checkout to empty the cart
   const clearCart = async () => {
     const { userId, config } = getUserAuth();
-    
-    // Clear Local State
     setCartItems([]);
-    
-    // Clear Database (if logged in)
-    if (userId && config.headers.Authorization) {
+    if (userId && config.headers?.Authorization) {
       try {
-        // This assumes you have a 'clear' endpoint on your backend
         await axios.delete(`${BACKEND_URL}/api/cart/clear/${userId}`, config);
       } catch (err) {
         console.error("Clear Cart Sync Error:", err.message);
@@ -75,7 +68,9 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCart = async (product, quantity, size) => {
+    if (!product) return;
     const { userId, config } = getUserAuth();
+    
     const itemData = {
       productId: product._id,
       name: product.name,
@@ -86,23 +81,28 @@ export const CartProvider = ({ children }) => {
     };
 
     setCartItems((prev) => {
-      const existingIndex = prev.findIndex(item => {
+      const currentItems = Array.isArray(prev) ? prev : [];
+      const existingIndex = currentItems.findIndex(item => {
         const itemId = item.productId?._id || item.productId;
         return itemId === product._id && item.size === size;
       });
+
       if (existingIndex > -1) {
-        const newCart = [...prev];
-        newCart[existingIndex].qty += quantity;
+        const newCart = [...currentItems];
+        newCart[existingIndex] = { 
+          ...newCart[existingIndex], 
+          qty: newCart[existingIndex].qty + quantity 
+        };
         return newCart;
       }
-      return [...prev, itemData];
+      return [...currentItems, itemData];
     });
 
     setIsCartOpen(true);
-    if (userId && config.headers.Authorization) {
+
+    if (userId && config.headers?.Authorization) {
       try {
         await axios.post(`${BACKEND_URL}/api/cart/add`, { userId, item: itemData }, config);
-        fetchCart(); 
       } catch (err) {
         console.error("Sync Error:", err.message);
       }
@@ -110,16 +110,19 @@ export const CartProvider = ({ children }) => {
   };
 
   const updateQty = async (productId, size, delta) => {
-    const { userId, config } = getUserAuth();
-    setCartItems(prev => prev.map(item => {
-      const itemId = item.productId?._id || item.productId;
-      if (itemId === productId && item.size === size) {
-        return { ...item, qty: Math.max(1, item.qty + delta) };
-      }
-      return item;
-    }));
+    setCartItems(prev => {
+      const currentItems = Array.isArray(prev) ? prev : [];
+      return currentItems.map(item => {
+        const itemId = item.productId?._id || item.productId;
+        if (itemId === productId && item.size === size) {
+          return { ...item, qty: Math.max(1, item.qty + delta) };
+        }
+        return item;
+      });
+    });
 
-    if (userId && config.headers.Authorization) {
+    const { userId, config } = getUserAuth();
+    if (userId && config.headers?.Authorization) {
       try {
         await axios.put(`${BACKEND_URL}/api/cart/update-qty`, { userId, productId, size, delta }, config);
       } catch (err) {
@@ -129,13 +132,16 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeItem = async (productId, size) => {
-    const { userId, config } = getUserAuth();
-    setCartItems(prev => prev.filter(item => {
-      const itemId = item.productId?._id || item.productId;
-      return !(itemId === productId && item.size === size);
-    }));
+    setCartItems(prev => {
+      const currentItems = Array.isArray(prev) ? prev : [];
+      return currentItems.filter(item => {
+        const itemId = item.productId?._id || item.productId;
+        return !(itemId === productId && item.size === size);
+      });
+    });
 
-    if (userId && config.headers.Authorization) {
+    const { userId, config } = getUserAuth();
+    if (userId && config.headers?.Authorization) {
       try {
         await axios.delete(`${BACKEND_URL}/api/cart/remove?userId=${userId}&productId=${productId}&size=${size}`, config);
       } catch (err) {
@@ -146,15 +152,8 @@ export const CartProvider = ({ children }) => {
 
   return (
     <CartContext.Provider value={{ 
-      cartItems, 
-      totalAmount, // Provided to Checkout
-      clearCart,   // Provided to Checkout
-      addToCart, 
-      updateQty, 
-      removeItem, 
-      isCartOpen, 
-      setIsCartOpen, 
-      fetchCart 
+      cartItems: Array.isArray(cartItems) ? cartItems : [], 
+      totalAmount, clearCart, addToCart, updateQty, removeItem, isCartOpen, setIsCartOpen, fetchCart 
     }}>
       {children}
     </CartContext.Provider>
