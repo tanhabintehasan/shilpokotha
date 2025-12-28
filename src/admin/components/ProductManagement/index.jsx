@@ -326,20 +326,20 @@ const ProductManagement = () => {
                   {/* Category Dropdown */}
                   {showDropdown && filteredCategories.length > 0 && (
                     <div className="absolute w-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 max-h-48 overflow-y-auto">
-                      {filteredCategories.map((cat) => (
-                        <button
-                          key={cat._id}
-                          type="button"
-                          className="w-full text-left p-4 hover:bg-gray-50 font-bold text-gray-600 transition-colors border-b border-gray-50 last:border-0"
-                          onClick={() => {
-                            setFormData({ ...formData, category: cat.name });
-                            setCategorySearch(cat.name);
-                            setShowDropdown(false);
-                          }}
-                        >
-                          {cat.name}
-                        </button>
-                      ))}
+                     {Array.isArray(filteredCategories) && filteredCategories.map((cat) => (
+  <button
+    key={cat._id}
+    type="button"
+    className="w-full text-left p-4 hover:bg-gray-50 font-bold text-gray-600 transition-colors border-b border-gray-50 last:border-0"
+    onClick={() => {
+      setFormData({ ...formData, category: cat.name });
+      setCategorySearch(cat.name);
+      setShowDropdown(false);
+    }}
+  >
+    {cat.name}
+  </button>
+))}
                     </div>
                   )}
                 </div>

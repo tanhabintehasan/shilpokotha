@@ -332,23 +332,19 @@ const SliderManagement = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
 
-          {zones.map((zone) => (
-
-            <button key={zone.id} onClick={() => handleZoneClick(zone)} className="flex flex-col items-center p-8 bg-white border-2 border-dashed border-gray-200 rounded-[2.5rem] hover:border-[#800020] transition-all group">
-
-              <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mb-6 group-hover:bg-[#800020] group-hover:text-white transition-all">
-
-                {zone.id === 'design' ? <Palette size={36} /> : <ImageIcon size={36} />}
-
-              </div>
-
-              <h3 className="font-black text-xl text-gray-800">{zone.title}</h3>
-
-              <p className="text-sm text-gray-400 mt-2 text-center px-4">{zone.desc}</p>
-
-            </button>
-
-          ))}
+         {Array.isArray(zones) && zones.map((zone) => (
+  <button 
+    key={zone?.id} 
+    onClick={() => handleZoneClick(zone)} 
+    className="flex flex-col items-center p-8 bg-white border-2 border-dashed border-gray-200 rounded-[2.5rem] hover:border-[#800020] transition-all group"
+  >
+    <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mb-6 group-hover:bg-[#800020] group-hover:text-white transition-all">
+      {zone?.id === 'design' ? <Palette size={36} /> : <ImageIcon size={36} />}
+    </div>
+    <h3 className="font-black text-xl text-gray-800">{zone?.title}</h3>
+    <p className="text-sm text-gray-400 mt-2 text-center px-4">{zone?.desc}</p>
+  </button>
+))}
 
         </div>
 

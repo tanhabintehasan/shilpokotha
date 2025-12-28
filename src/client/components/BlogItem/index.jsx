@@ -15,7 +15,7 @@ const BlogItem = () => {
   const [loading, setLoading] = useState(true);
   const BACKEND_URL = "";
 
-  // --- IMAGE LOGIC (Same as your HomeSlider) ---
+  // --- IMAGE LOGIC (Standardized) ---
   const getImageUrl = (path) => {
     if (!path) return "https://placehold.co/600x400?text=No+Image";
     if (path.startsWith("http")) return path;
@@ -33,12 +33,17 @@ const BlogItem = () => {
     const fetchBlogs = async () => {
       try {
         setLoading(true);
-        // Using the same product API but filtering for 'blog'
         const res = await axios.get(`${BACKEND_URL}/api/products?designType=blog`);
-        const data = Array.isArray(res.data) ? res.data : res.data.products || [];
+        
+        // Defensive data check
+        const data = Array.isArray(res.data) 
+          ? res.data 
+          : (res.data?.products || []);
+          
         setBlogs(data);
       } catch (err) {
         console.error("Error fetching blogs:", err);
+        setBlogs([]); // Reset to empty array on error
       } finally {
         setLoading(false);
       }
@@ -47,7 +52,9 @@ const BlogItem = () => {
   }, []);
 
   if (loading) return <div className="py-20 text-center">Loading Tradition...</div>;
-  if (blogs.length === 0) return null;
+  
+  // If no blogs, don't render the section at all
+  if (!Array.isArray(blogs) || blogs.length === 0) return null;
 
   return (
     <section className="w-full max-w-[1200px] mx-auto px-4 py-16">
@@ -78,17 +85,18 @@ const BlogItem = () => {
         }}
         className="blog-swiper pb-14"
       >
-        {blogs.map((blog) => (
-          <SwiperSlide key={blog._id}>
+        {/* SAFE MAP: Added check for array and optional chaining */}
+        {Array.isArray(blogs) && blogs.map((blog) => (
+          <SwiperSlide key={blog?._id || Math.random()}>
             <div
               className="bg-white group cursor-pointer border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-lg overflow-hidden flex flex-col h-full"
-              onClick={() => navigate(`/blog/${blog._id}`)}
+              onClick={() => blog?._id && navigate(`/blog/${blog._id}`)}
             >
               {/* Image Container */}
               <div className="relative h-[240px] w-full overflow-hidden bg-gray-100">
                 <img
-                  src={getImageUrl(blog.imageURL)}
-                  alt={blog.name}
+                  src={getImageUrl(blog?.imageURL)}
+                  alt={blog?.name || "Blog Post"}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   onError={(e) => {
                     e.target.onerror = null;
@@ -96,7 +104,7 @@ const BlogItem = () => {
                   }}
                 />
                 {/* Category Badge */}
-                {blog.category && (
+                {blog?.category && (
                   <div className="absolute top-4 left-4 bg-[#800020] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">
                     {blog.category}
                   </div>
@@ -106,10 +114,10 @@ const BlogItem = () => {
               {/* Text Area */}
               <div className="p-6 flex flex-col h-[200px]">
                 <h3 className="text-xl font-serif text-gray-900 mb-2 leading-tight h-[56px] line-clamp-2">
-                  {blog.name}
+                  {blog?.name || "Untitled Article"}
                 </h3>
                 <p className="text-gray-600 text-sm leading-relaxed mb-auto line-clamp-3">
-                  {blog.description}
+                  {blog?.description || "No description available for this post."}
                 </p>
                 <div className="mt-4 flex items-center text-[#006a4e] font-bold text-xs uppercase tracking-widest">
                   <span>Read Article</span>

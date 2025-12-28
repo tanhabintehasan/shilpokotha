@@ -4,142 +4,107 @@ import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import Button from "@mui/material/Button";
 import { IoClose } from "react-icons/io5";
-import { FaRegSquarePlus } from "react-icons/fa6";
+import { FaPlus, FaMinus } from "react-icons/fa6";
 
 const Cetagorypanel = ({ isOpenCatPanel, setIsOpenCatPanel }) => {
-  const [openIndex, setOpenIndex] = useState(null); // Track which submenu is open
+  const [openIndex, setOpenIndex] = useState(null);
 
   const toggleDrawer = (newOpen) => () => {
     setIsOpenCatPanel(newOpen);
   };
 
-  // Toggle submenu open/close
-  const toggleSubmenu = (index) => {
-    if (openIndex === index) {
-      setOpenIndex(null); // Close if already open
-    } else {
-      setOpenIndex(index); // Open clicked submenu
-    }
+  const toggleSubmenu = (e, index) => {
+    // Prevent navigation when just clicking the toggle icon
+    e.preventDefault();
+    e.stopPropagation();
+    setOpenIndex(openIndex === index ? null : index);
   };
 
   const categories = [
-    {
-      name: "Fashion",
-      link: "/fashion",
-      submenu: ["Traditional", "Handcrafted", "Contemporary", "Winter"],
-    },
-    {
-      name: "Bags",
-      link: "/bags",
-      submenu: ["Hand Bags", "Tote Bags", "Jute Bags", "Backpacks"],
-    },
-    {
-      name: "Footwear",
-      link: "/footwear",
-      submenu: [
-        "Traditional Footwear",
-        "Leather Sandals",
-        "Flats",
-        "Sneakers",
-        "Ethnic Footwear",
-      ],
-    },
-    {
-      name: "Beauty",
-      link: "/beauty",
-      submenu: [
-        "Multani Mati",
-        "Herbal Soaps",
-        "Natural Face Packs",
-        "Other Local Products",
-      ],
-    },
-    {
-      name: "Jewellery",
-      link: "/jewellery",
-      submenu: [
-        "Gold Jewellery",
-        "Silver Jewellery",
-        "Tribal/Traditional Jewellery",
-        "Handmade Jewellery",
-      ],
-    },
-    {
-      name: "Wellness",
-      link: "/wellness",
-      submenu: [
-        "Herbal Oils",
-        "Natural Teas",
-        "Traditional Remedies",
-        "Other Local Products",
-      ],
-    },
-    {
-      name: "Home Decor",
-      link: "/home-decor",
-      submenu: [
-        "Bamboo & Cane Products",
-        "Pottery & Clay Items",
-        "Handcrafted Fabrics & Textiles",
-        "Brass & Bell Metal Items",
-        "Other Traditional Products",
-      ],
-    },
+    { name: "Fashion", link: "/fashion", submenu: ["Traditional", "Handcrafted", "Contemporary", "Winter"] },
+    { name: "Bags", link: "/bags", submenu: ["Hand Bags", "Tote Bags", "Jute Bags", "Backpacks"] },
+    { name: "Footwear", link: "/footwear", submenu: ["Traditional", "Leather Sandals", "Flats", "Sneakers", "Ethnic"] },
+    { name: "Beauty", link: "/beauty", submenu: ["Multani Mati", "Herbal Soaps", "Face Packs", "Local Products"] },
+    { name: "Jewellery", link: "/jewellery", submenu: ["Gold", "Silver", "Tribal", "Handmade"] },
+    { name: "Wellness", link: "/wellness", submenu: ["Herbal Oils", "Natural Teas", "Traditional Remedies"] },
+    { name: "Home Decor", link: "/home-decor", submenu: ["Bamboo & Cane", "Pottery", "Fabrics", "Brass Items"] },
   ];
 
   return (
     <Drawer
+      anchor="left"
       open={isOpenCatPanel}
       onClose={toggleDrawer(false)}
-      PaperProps={{ style: { backgroundColor: "#EADDCA" } }} // Full sidebar background
-    >
-      <Box sx={{ width: 250, p: 4 }}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[16px] font-[500]">Shop By Categories</h3>
+      PaperProps={{ 
+        sx: { 
+          backgroundColor: "#FDF7F0", // Softer cream background
+          width: { xs: "280px", sm: "320px" },
+          borderRight: "4px solid #631212" // Maroon accent border
+        } 
+      }}
+    </Drawer>
+      <Box sx={{ p: 0 }}>
+        {/* Header Section */}
+        <div className="flex items-center justify-between p-5 bg-[#631212] text-white">
+          <h3 className="text-[16px] font-semibold uppercase tracking-widest">Categories</h3>
           <IoClose
             onClick={toggleDrawer(false)}
-            className="cursor-pointer text-[20px]"
+            className="cursor-pointer text-[24px] hover:rotate-90 transition-transform duration-300"
           />
         </div>
 
-        <ul className="w-full">
-          {categories.map((cat, idx) => (
-            <li key={idx} className="list-none relative mb-2">
-              <Button
-                className="!w-full !justify-between !bg-[#EADDCA] !text-black !normal-case !text-[13px] font-[400]"
-                onClick={() => toggleSubmenu(idx)}
-              >
-                <Link to={cat.link} className="link">
-                  {cat.name}
-                </Link>
-                <FaRegSquarePlus
-                  className={`transition-transform ${
-                    openIndex === idx ? "rotate-45" : ""
-                  }`}
-                />
-              </Button>
+        <div className="p-4">
+          <ul className="w-full space-y-1">
+            {categories.map((cat, idx) => (
+              <li key={idx} className="list-none border-b border-gray-200 last:border-0">
+                <div className="flex items-center justify-between w-full">
+                  <Link 
+                    to={cat.link} 
+                    onClick={toggleDrawer(false)}
+                    className="flex-1 py-3 text-[14px] font-medium text-gray-800 hover:text-[#631212] transition-colors"
+                  >
+                    {cat.name}
+                  </Link>
+                  
+                  <button
+                    onClick={(e) => toggleSubmenu(e, idx)}
+                    className="p-3 text-[#631212] hover:bg-gray-100 rounded-md transition-all"
+                  >
+                    {openIndex === idx ? <FaMinus size={12} /> : <FaPlus size={12} />}
+                  </button>
+                </div>
 
-              {/* Submenu */}
-              <div
-                className={`transition-all duration-300 overflow-hidden ${
-                  openIndex === idx
-                    ? "max-h-[500px] opacity-100 visible"
-                    : "max-h-0 opacity-0 invisible"
-                }`}
-              >
-                <ul className="ml-4 mt-1">
-                  {cat.submenu.map((item, subIdx) => (
-                    <li key={subIdx} className="list-none mb-1">
-                      <Button className="!w-full !justify-start !bg-[#B89B7A] !text-black !text-[13px] !normal-case font-[400]">
-                        {item}
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </li>
-          ))}
-        </ul>
+                {/* Submenu with Smooth Transition */}
+                <div
+                  className={`transition-all duration-500 ease-in-out overflow-hidden ${
+                    openIndex === idx ? "max-h-[400px] mb-4" : "max-h-0"
+                  }`}
+                >
+                  <ul className="bg-[#EADDCA]/30 rounded-lg py-2">
+                    {cat.submenu.map((item, subIdx) => (
+                      <li key={subIdx} className="list-none">
+                        <Link
+                          to={`${cat.link}/${item.toLowerCase().replace(/\s+/g, '-')}`}
+                          onClick={toggleDrawer(false)}
+                          className="block w-full px-6 py-2 text-[13px] text-gray-600 hover:text-[#631212] hover:translate-x-2 transition-all border-l-2 border-transparent hover:border-[#631212]"
+                        >
+                          {item}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Branding Footer inside Drawer */}
+        <div className="absolute bottom-0 w-full p-6 text-center bg-[#FDF7F0]">
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest">
+              Shilpokotha Tradition
+            </p>
+        </div>
       </Box>
     </Drawer>
   );

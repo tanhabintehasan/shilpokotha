@@ -86,24 +86,27 @@ const AdminDashboard = () => {
         {/* This nav handles the Management Buttons */}
         <nav className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-1 px-3">
-            {menuItems.map((item, index) => (
-              <li key={index}>
-                <button
-                  onClick={() => setCurrentView(item.name)}
-                  className={`w-full flex items-center justify-between p-3 rounded-lg transition-all group ${
-                    currentView === item.name
-                      ? "bg-[#800020] text-white shadow-md"
-                      : "text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    {item.icon}
-                    <span className="text-sm font-medium">{item.name}</span>
-                  </div>
-                  <ChevronRight size={14} className={`${currentView === item.name ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
-                </button>
-              </li>
-            ))}
+            {Array.isArray(menuItems) && menuItems.map((item, index) => (
+  <li key={index}>
+    <button
+      onClick={() => setCurrentView(item.name)}
+      className={`w-full flex items-center justify-between p-3 rounded-lg transition-all group ${
+        currentView === item.name
+          ? "bg-[#800020] text-white shadow-md"
+          : "text-gray-600 hover:bg-gray-50"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        {item.icon}
+        <span className="text-sm font-medium">{item.name}</span>
+      </div>
+      <ChevronRight 
+        size={14} 
+        className={`${currentView === item.name ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} 
+      />
+    </button>
+  </li>
+))}
           </ul>
         </nav>
 
