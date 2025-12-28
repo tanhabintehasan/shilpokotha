@@ -1,7 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
-import path from "path";
+import path from "dotenv";
 import { fileURLToPath } from "url";
+import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
@@ -32,7 +33,7 @@ const PORT = process.env.PORT || 5000;
 // Connect to Database
 connectDB();
 
-// Ensure Upload Directory Exists
+// Ensure Upload Directory Exists (Note: Vercel is read-only; this works for local dev)
 const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -51,7 +52,7 @@ app.use(cors({
     origin: [
         "http://localhost:5173", 
         "http://127.0.0.1:5173",
-        "https://shilpokotha-bd9w7g2me-tanhabintehasans-projects.vercel.app" // Added your Vercel URL
+        "https://shilpokotha-bd9w7g2me-tanhabintehasans-projects.vercel.app"
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
@@ -95,7 +96,14 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Start Server - Updated log to be generic for production
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+// --- SERVER INITIALIZATION ---
+// On Vercel, the environment is treated as production and the app is managed as a serverless function.
+// We only call app.listen() when running locally.
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`🚀 Local server running on http://localhost:${PORT}`);
+    });
+}
+
+// Export for Vercel
+export default app;
