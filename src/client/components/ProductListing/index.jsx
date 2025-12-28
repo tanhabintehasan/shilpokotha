@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-// axiosInstance ব্যবহার করলে আলাদা axios প্রয়োজন নেই
-import axiosInstance from '../api/axiosInstance';
+
+import axiosInstance from '../../../utils/axiosInstance';
 import SideBar from "../SideBar/Index";
 import ProductItem from "../ProductItem/Index";
 import ProductModal from "../ProductModal/index"; 
