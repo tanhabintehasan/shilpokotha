@@ -9,7 +9,7 @@ import ProductsSlider from "../../components/ProductsSlider/Index";
 import SecondBanner from "../../components/SecondBanner";
 import BlogItem from "../../components/BlogItem";
 import HeroBanner from "../../components/HeroBanner";
-import axiosInstance from '../api/axiosInstance';
+import axiosInstance from '../../../utils/axiosInstance';
 
 const Home = () => {
   // ইমেজ পাথের জন্য ব্যাকএন্ড ইউআরএল
