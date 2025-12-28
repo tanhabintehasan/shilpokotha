@@ -4,7 +4,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { Link } from "react-router-dom";
 
-// Standard Swiper Styles
 import "swiper/css";
 import "swiper/css/navigation";
 
@@ -12,18 +11,13 @@ const HomeCatSlider = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // VITE Environment Variable
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
 
-  /**
-   * Helper to resolve image paths from backend
-   */
   const getImageUrl = (path) => {
     if (!path || path === "null" || path === "undefined") {
       return "https://placehold.co/150x150?text=No+Image";
     }
     if (path.startsWith("http")) return path;
-    
     const cleanPath = path.startsWith("/") ? path : `/${path}`;
     return cleanPath.includes("/uploads") 
       ? `${BACKEND_URL}${cleanPath}` 
@@ -34,22 +28,28 @@ const HomeCatSlider = () => {
     let isMounted = true;
     setLoading(true);
 
-    // Fetch active home category slides
     axios.get(`${BACKEND_URL}/api/product-slider/active/homecatslide`)
       .then(res => {
         if (isMounted) {
-          const rawData = res.data;
-          let finalArray = [];
+          // DEBUG: This will help us see the exact structure in production logs
+          console.log("Slider API Raw Response:", res.data);
 
-          // Robust extraction to prevent ".map is not a function"
+          let finalArray = [];
+          const rawData = res.data;
+
+          // DEEP SCAN LOGIC
           if (Array.isArray(rawData)) {
             finalArray = rawData;
-          } else if (rawData && Array.isArray(rawData.data)) {
-            finalArray = rawData.data;
           } else if (rawData && typeof rawData === 'object') {
-            // Find any property in the object that is an array
-            const foundArray = Object.values(rawData).find(val => Array.isArray(val));
-            finalArray = foundArray || [];
+            // Priority 1: Check standard 'data' or 'categories' keys
+            if (Array.isArray(rawData.data)) finalArray = rawData.data;
+            else if (Array.isArray(rawData.categories)) finalArray = rawData.categories;
+            else if (Array.isArray(rawData.items)) finalArray = rawData.items;
+            // Priority 2: Hunt for any key that contains an array
+            else {
+              const detectedArray = Object.values(rawData).find(val => Array.isArray(val));
+              finalArray = detectedArray || [];
+            }
           }
 
           setCategories(finalArray);
@@ -67,9 +67,6 @@ const HomeCatSlider = () => {
     return () => { isMounted = false; };
   }, [BACKEND_URL]);
 
-  /**
-   * 1. Loading Skeleton UI
-   */
   if (loading) {
     return (
       <div className="mt-8 px-4 flex justify-center gap-6 animate-pulse overflow-hidden">
@@ -83,10 +80,10 @@ const HomeCatSlider = () => {
     );
   }
 
-  /**
-   * 2. Empty State Handling
-   */
-  if (categories.length === 0) return null;
+  // PREVENT CRASH: If categories isn't an array yet, don't render the map
+  if (!Array.isArray(categories) || categories.length === 0) {
+    return null;
+  }
 
   return (
     <div className="HomeCatSlider mt-6 px-4 pt-4 select-none">
@@ -94,6 +91,7 @@ const HomeCatSlider = () => {
         <Swiper
           spaceBetween={20}
           navigation={true}
+          // Dynamic loop based on actual array length
           loop={categories.length > 8}
           modules={[Navigation]}
           breakpoints={{
@@ -105,22 +103,18 @@ const HomeCatSlider = () => {
           }}
           className="mySwiper HomeCatSwiper !pb-8"
         >
-          {categories.map((cat) => (
-            <SwiperSlide key={cat?._id || Math.random()}>
+          {categories.map((cat, index) => (
+            <SwiperSlide key={cat?._id || `cat-${index}`}>
               <Link 
-                to={`/category/${cat?.name?.toLowerCase().trim().replace(/\s+/g, '-')}`} 
+                to={`/category/${cat?.name?.toLowerCase().trim().replace(/\s+/g, '-') || 'all'}`} 
                 className="block group"
               >
                 <div className="flex flex-col items-center">
-                  {/* Circle Image Wrapper */}
-                  <div
-                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-[115px] md:h-[115px] 
-                               rounded-full overflow-hidden 
-                               border-2 border-[#eaddca] bg-[#fdf7f0] 
-                               flex items-center justify-center 
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-[115px] md:h-[115px] 
+                               rounded-full overflow-hidden border-2 border-[#eaddca] 
+                               bg-[#fdf7f0] flex items-center justify-center 
                                shadow-sm transition-all duration-500 
-                               group-hover:shadow-xl group-hover:border-[#b58e58] group-hover:-translate-y-2"
-                  >
+                               group-hover:shadow-xl group-hover:border-[#b58e58] group-hover:-translate-y-2">
                     <img
                       src={getImageUrl(cat?.imageURL || cat?.image)}
                       alt={cat?.name || "Category"}
@@ -128,8 +122,6 @@ const HomeCatSlider = () => {
                       loading="lazy"
                     />
                   </div>
-
-                  {/* Category Title */}
                   <h3 className="mt-4 text-[12px] md:text-[14px] font-bold text-gray-700 group-hover:text-[#b58e58] transition-colors line-clamp-1 text-center px-1">
                     {cat?.name || "Unnamed"}
                   </h3>
