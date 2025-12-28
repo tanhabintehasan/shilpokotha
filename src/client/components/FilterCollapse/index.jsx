@@ -1,24 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronDown, Plus, Minus, Star } from "lucide-react";
 
 const FilterCollapse = () => {
-  // 1. Unified State for Categories
+  // 1. Unified State - Initialized as empty arrays to prevent .includes/find errors
   const [selectedCategories, setSelectedCategories] = useState(["Fashion"]);
-  const [openSections, setOpenSections] = useState({
-    Fashion: true,
-    Bags: false,
-    Footwear: false,
-    Beauty: false,
-    Jewellery: false,
-    Wellness: false,
-    "Home Decor": false,
-  });
-
+  const [openSections, setOpenSections] = useState({});
   const [activeSubMenu, setActiveSubMenu] = useState(null);
   const [price, setPrice] = useState(60000);
   const [selectedSize, setSelectedSize] = useState("M");
 
-  // Data Configuration for scannability
+  // Data Configuration
   const categoryData = [
     { name: "Fashion", sub: ["Men", "Women", "Boys", "Girls"] },
     { name: "Bags", list: ["Hand Bags", "Tote Bags", "Jute Bags", "Backpacks"] },
@@ -29,14 +20,30 @@ const FilterCollapse = () => {
     { name: "Home Decor", list: ["Bamboo & Cane", "Pottery", "Fabrics", "Brass"] },
   ];
 
+  // Auto-initialize openSections based on data
+  useEffect(() => {
+    const initialOpen = {};
+    categoryData.forEach(cat => {
+      initialOpen[cat.name] = cat.name === "Fashion"; // Default 'Fashion' to open
+    });
+    setOpenSections(initialOpen);
+  }, []);
+
   const toggleSection = (name) => {
-    setOpenSections(prev => ({ ...prev, [name]: !prev[name] }));
+    setOpenSections(prev => ({ 
+      ...(prev || {}), 
+      [name]: !prev?.[name] 
+    }));
   };
 
   const handleToggleCategory = (cat) => {
-    setSelectedCategories(prev => 
-      prev.includes(cat) ? prev.filter(item => item !== cat) : [...prev, cat]
-    );
+    setSelectedCategories(prev => {
+      // Defensive check: ensure prev is always an array
+      const current = Array.isArray(prev) ? prev : [];
+      return current.includes(cat) 
+        ? current.filter(item => item !== cat) 
+        : [...current, cat];
+    });
   };
 
   const getSliderBackground = () => {
@@ -56,50 +63,55 @@ const FilterCollapse = () => {
         </h2>
 
         {/* --- DYNAMIC CATEGORY RENDERING --- */}
-        {categoryData.map((section) => (
+        {/* Safety Check: ensure categoryData exists before mapping */}
+        {(categoryData || []).map((section) => (
           <div key={section.name} className="mb-4">
             <div className="flex items-center gap-3 mb-2">
               <input
                 type="checkbox"
+                // x.includes crash prevention
                 checked={(selectedCategories || []).includes(section.name)}
                 onChange={() => handleToggleCategory(section.name)}
                 className="w-5 h-5 accent-white rounded cursor-pointer"
               />
               <button
                 onClick={() => toggleSection(section.name)}
-                className="text-[15px] font-medium flex-1 text-left"
+                className="text-[15px] font-medium flex-1 text-left hover:text-[#B89B7A] transition-colors"
               >
                 {section.name}
               </button>
-              <span onClick={() => toggleSection(section.name)} className="cursor-pointer">
-                {openSections[section.name] ? <Minus size={14} /> : <Plus size={14} />}
+              <span onClick={() => toggleSection(section.name)} className="cursor-pointer p-1">
+                {openSections?.[section.name] ? <Minus size={14} /> : <Plus size={14} />}
               </span>
             </div>
 
-            {openSections[section.name] && (
-              <ul className="pl-8 space-y-1 mb-4">
-                {/* Handle Sections with Sub-menus (Gender based) */}
+            {openSections?.[section.name] && (
+              <ul className="pl-8 space-y-1 mb-4 border-l border-white/10 ml-2">
+                {/* Gender based sub-menus */}
                 {section.sub?.map((cat, idx) => (
                   <li key={idx}>
                     <button
                       onClick={() => setActiveSubMenu(activeSubMenu === `${section.name}-${idx}` ? null : `${section.name}-${idx}`)}
-                      className="text-white/70 hover:text-white text-[13px] py-1 w-full text-left flex justify-between items-center"
+                      className="text-white/70 hover:text-white text-[13px] py-1 w-full text-left flex justify-between items-center group"
                     >
-                      {cat} {activeSubMenu === `${section.name}-${idx}` ? "-" : "+"}
+                      {cat} 
+                      <span className="text-white/30 group-hover:text-white">
+                        {activeSubMenu === `${section.name}-${idx}` ? <Minus size={10}/> : <Plus size={10}/>}
+                      </span>
                     </button>
                     {activeSubMenu === `${section.name}-${idx}` && (
-                      <div className="pl-4 py-1 text-[12px] text-white/50 space-y-1">
+                      <div className="pl-4 py-1 text-[12px] text-white/50 space-y-1 animate-in fade-in slide-in-from-left-1">
                         {["Traditional", "Handcrafted", "Contemporary"].map(item => (
-                          <p key={item} className="cursor-pointer hover:text-white">{item}</p>
+                          <p key={item} className="cursor-pointer hover:text-white hover:translate-x-1 transition-transform">{item}</p>
                         ))}
                       </div>
                     )}
                   </li>
                 ))}
                 
-                {/* Handle Simple List Sections */}
+                {/* Simple List Sections */}
                 {section.list?.map((item, idx) => (
-                  <li key={idx} className="text-white/70 hover:text-white text-[13px] py-1 cursor-pointer">
+                  <li key={idx} className="text-white/70 hover:text-white text-[13px] py-1 cursor-pointer hover:translate-x-1 transition-transform">
                     {item}
                   </li>
                 ))}
@@ -109,48 +121,54 @@ const FilterCollapse = () => {
         ))}
 
         {/* --- FILTER BY PRICE --- */}
-        <div className="mb-8 pt-4 border-t border-white/10">
-          <h3 className="text-[15px] font-bold mb-4">Filter By Price</h3>
+        <div className="mb-8 pt-6 border-t border-white/10">
+          <h3 className="text-[15px] font-bold mb-4 uppercase tracking-wider text-white/90">Price Range</h3>
           <input
             type="range" min="0" max="60000"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             style={{ background: getSliderBackground() }}
-            className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-[#ff4d4d]"
+            className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-white"
           />
           <div className="flex justify-between mt-3 text-[12px]">
-            <span className="text-white/70">From: <b className="text-white">BDT 0</b></span>
-            <span className="text-white/70">To: <b className="text-white">BDT {price}</b></span>
+            <span className="text-white/60">Min: <b className="text-white">৳ 0</b></span>
+            <span className="text-white/60">Max: <b className="text-white">৳ {price}</b></span>
           </div>
         </div>
 
         {/* --- FILTER BY RATING --- */}
-        <div className="mb-8">
-          <h3 className="text-[15px] font-bold mb-4">Filter By Rating</h3>
+        <div className="mb-8 pt-4 border-t border-white/10">
+          <h3 className="text-[15px] font-bold mb-4 uppercase tracking-wider text-white/90">Rating</h3>
           <div className="space-y-3">
             {[5, 4, 3, 2].map((num) => (
-              <label key={num} className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" className="w-5 h-5 accent-white" />
+              <label key={num} className="flex items-center gap-3 cursor-pointer group">
+                <input type="checkbox" className="w-4 h-4 accent-white rounded" />
                 <div className="flex text-yellow-400">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={16} fill={i < num ? "#facc15" : "none"} stroke={i < num ? "none" : "white"} />
+                    <Star key={i} size={14} 
+                      fill={i < num ? "#facc15" : "none"} 
+                      stroke={i < num ? "#facc15" : "rgba(255,255,255,0.3)"} 
+                    />
                   ))}
                 </div>
+                <span className="text-[11px] text-white/40 group-hover:text-white">& Up</span>
               </label>
             ))}
           </div>
         </div>
 
         {/* --- FILTER BY SIZE --- */}
-        <div className="pb-10">
-          <h3 className="text-[15px] font-bold mb-4">Filter By Size</h3>
+        <div className="pb-10 pt-4 border-t border-white/10">
+          <h3 className="text-[15px] font-bold mb-4 uppercase tracking-wider text-white/90">Available Sizes</h3>
           <div className="flex flex-wrap gap-2">
             {["XS", "S", "M", "L", "XL"].map((size) => (
               <button
                 key={size}
-                onClick={() => setSelectedSize?.(size)}
-                className={`min-w-[50px] h-[38px] flex items-center justify-center border text-[13px] font-bold rounded transition-all
-                  ${selectedSize === size ? "bg-[#2587d1] text-white border-[#2587d1]" : "bg-white text-black border-gray-300 hover:border-[#2587d1]"}`}
+                onClick={() => setSelectedSize(size)}
+                className={`w-10 h-10 flex items-center justify-center text-[12px] font-bold rounded-lg transition-all duration-300
+                  ${selectedSize === size 
+                    ? "bg-white text-[#631212] shadow-lg scale-110" 
+                    : "bg-white/10 text-white border border-white/10 hover:bg-white/20"}`}
               >
                 {size}
               </button>

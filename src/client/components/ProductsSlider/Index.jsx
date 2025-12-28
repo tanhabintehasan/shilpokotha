@@ -14,53 +14,83 @@ const ProductsSlider = () => {
   const [viewProduct, setViewProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = "";
+  // Vite environment variable fix
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
 
-  // --- অ্যাডমিন প্যানেল থেকে আনা একই ইমেজ লজিক ---
   const getImageUrl = (path) => {
-    if (!path) return "https://placehold.co/300x400?text=No+Image";
+    if (!path || path === "null" || path === "undefined") {
+      return "https://placehold.co/300x400?text=No+Image";
+    }
     if (path.startsWith("http")) return path;
     
-    // ডাটাবেসে যদি "/uploads/name.png" থাকে
-    if (path.includes("uploads/")) {
-      const cleanPath = path.startsWith("/") ? path : `/${path}`;
-      return `${BACKEND_URL}${cleanPath}`;
-    }
-
-    // ডাটাবেসে যদি শুধু ফাইলের নাম থাকে
-    const fileName = path.startsWith("/") ? path.slice(1) : path;
-    return `${BACKEND_URL}/uploads/${fileName}`;
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+    
+    return cleanPath.includes("uploads/") 
+      ? `${BACKEND_URL}${cleanPath}` 
+      : `${BACKEND_URL}/uploads${cleanPath}`;
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchSliderData = async () => {
       try {
         setLoading(true);
-        // এপিআই কল
         const res = await axios.get(`${BACKEND_URL}/api/product-slider/active/productslide`);
         
-        // প্রতিটি আইটেমের imageURL প্রসেস করা
-        const processedData = (res.data || []).map(item => ({
+        if (isMounted) {
+          const rawData = res.data;
+          let finalArray = [];
+
+          // Robust Array Extraction (Deep Scan)
+          if (Array.isArray(rawData)) {
+            finalArray = rawData;
+          } else if (rawData && typeof rawData === 'object') {
+            if (Array.isArray(rawData.data)) finalArray = rawData.data;
+            else if (Array.isArray(rawData.products)) finalArray = rawData.products;
+            else if (Array.isArray(rawData.items)) finalArray = rawData.items;
+            else {
+              const foundArray = Object.values(rawData).find(val => Array.isArray(val));
+              finalArray = foundArray || [];
+            }
+          }
+
+          // Process paths and safely map
+          const processedData = finalArray.map(item => ({
             ...item,
-            imageURL: getImageUrl(item.imageURL) // এখানে ইমেজ পাথ ঠিক করা হচ্ছে
-        }));
-        
-        setProducts(processedData);
+            imageURL: getImageUrl(item.imageURL || item.image)
+          }));
+          
+          setProducts(processedData);
+        }
       } catch (err) {
         console.error("Slider fetch failed:", err);
+        if (isMounted) setProducts([]);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
+
     fetchSliderData();
-  }, []);
+    return () => { isMounted = false; };
+  }, [BACKEND_URL]);
 
   const openProductDetailsModal = (product) => {
     setViewProduct(product);
     setIsOpenModal(true);
   };
 
-  if (loading) return <div className="h-60 flex items-center justify-center font-bold text-gray-400">Loading Products...</div>;
+  if (loading) {
+    return (
+      <div className="h-60 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#800020]"></div>
+        <span className="ml-3 font-bold text-gray-400">Loading Products...</span>
+      </div>
+    );
+  }
+
+  // Prevent rendering if no products
+  if (!Array.isArray(products) || products.length === 0) return null;
 
   return (
     <>
@@ -79,10 +109,10 @@ const ProductsSlider = () => {
             1024: { slidesPerView: 5, spaceBetween: 15 },
           }}
         >
-          {products.map((item) => (
-            <SwiperSlide key={item._id}>
+          {products.map((item, index) => (
+            <SwiperSlide key={item._id || `prod-slide-${index}`}>
               <ProductItem
-                item={item} // এখন item.imageURL অলরেডি ফুল পাথ হিসেবে যাবে
+                item={item}
                 onViewDetails={() => openProductDetailsModal(item)}
               />
             </SwiperSlide>

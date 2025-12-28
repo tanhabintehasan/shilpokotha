@@ -8,65 +8,101 @@ import "./HomeSlider.css";
 const HomeSlider = () => {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
-  const BACKEND_URL = "";
+  
+  // VITE FIX: Use environment variable
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
 
-  // --- ইমেজ লজিক (আপনার ম্যানেজমেন্ট টেবিল থেকে নেওয়া) ---
+  /**
+   * Helper to resolve image paths correctly
+   */
   const getImageUrl = (path) => {
-    if (!path) return "https://placehold.co/800x450?text=No+Image";
+    if (!path || path === "null" || path === "undefined") {
+      return "https://placehold.co/800x450?text=No+Image";
+    }
     if (path.startsWith("http")) return path;
 
-    if (path.includes("uploads/")) {
-      const cleanPath = path.startsWith("/") ? path : `/${path}`;
-      return `${BACKEND_URL}${cleanPath}`;
-    }
-
-    const fileName = path.startsWith("/") ? path.slice(1) : path;
-    return `${BACKEND_URL}/uploads/${fileName}`;
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+    
+    return cleanPath.includes("uploads/") 
+      ? `${BACKEND_URL}${cleanPath}` 
+      : `${BACKEND_URL}/uploads${cleanPath}`;
   };
 
   useEffect(() => {
+    let isMounted = true;
     const fetchHomeSlides = async () => {
       try {
         setLoading(true);
-        // 'homeslide' আইডি ব্যবহার করে এপিআই কল
         const res = await axios.get(`${BACKEND_URL}/api/product-slider/active/homeslide`);
-        setSlides(Array.isArray(res.data) ? res.data : []);
+        
+        if (isMounted) {
+          const rawData = res.data;
+          let finalArray = [];
+
+          // Robust Data Extraction
+          if (Array.isArray(rawData)) {
+            finalArray = rawData;
+          } else if (rawData && typeof rawData === 'object') {
+            if (Array.isArray(rawData.data)) finalArray = rawData.data;
+            else if (Array.isArray(rawData.slides)) finalArray = rawData.slides;
+            else if (Array.isArray(rawData.products)) finalArray = rawData.products;
+            else {
+              // Fallback: Find any array in the object
+              const foundArray = Object.values(rawData).find(val => Array.isArray(val));
+              finalArray = foundArray || [];
+            }
+          }
+
+          setSlides(finalArray);
+        }
       } catch (err) {
         console.error("Error fetching home slides:", err);
+        if (isMounted) setSlides([]);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
-    fetchHomeSlides();
-  }, []);
 
-  if (loading) return <div className="h-[400px] flex items-center justify-center">Loading Slider...</div>;
-  if (slides.length === 0) return null;
+    fetchHomeSlides();
+    return () => { isMounted = false; };
+  }, [BACKEND_URL]);
+
+  if (loading) {
+    return (
+      <div className="max-w-[1200px] mx-auto mt-6 aspect-[16/9] md:aspect-[21/9] bg-gray-200 animate-pulse rounded-2xl flex items-center justify-center text-gray-400 font-bold">
+        Loading Main Slider...
+      </div>
+    );
+  }
+
+  // Prevent rendering if no data
+  if (!Array.isArray(slides) || slides.length === 0) return null;
 
   return (
-    <div className="max-w-[1200px] mx-auto bg-[#f3efe9] rounded-2xl overflow-hidden mt-6">
+    <div className="max-w-[1200px] mx-auto bg-[#f3efe9] rounded-2xl overflow-hidden mt-6 shadow-sm">
       <div className="grid grid-cols-1 md:grid-cols-[30%_70%] gap-4 items-center">
+        
         {/* LEFT CONTENT */}
         <div className="p-8 md:p-12">
-          <h2 className="text-[34px] leading-tight font-[500] text-[#3b2f2a] mb-4">
+          <h2 className="text-[30px] md:text-[34px] leading-tight font-[600] text-[#3b2f2a] mb-4">
             Bangladeshi Handcrafted Fashion
           </h2>
           <p className="text-[15px] text-[#6b5f58] mb-6">
             Explore timeless sarees and artisan-made ethnic wear inspired by
             Bangladeshi heritage.
           </p>
-          <button className="px-6 py-3 bg-[#7a3e2d] text-white rounded-lg text-[14px] font-medium hover:bg-[#633226] transition shadow-md">
+          <button className="px-6 py-3 bg-[#7a3e2d] text-white rounded-lg text-[14px] font-bold hover:bg-[#633226] transition shadow-md hover:-translate-y-0.5 active:translate-y-0">
             Shop Collection
           </button>
         </div>
 
         {/* RIGHT SLIDER */}
         <div className="p-4">
-          <div className="p-2 border border-[#cbb8a0] rounded-2xl bg-[#efe7dc] shadow-sm">
+          <div className="p-2 border border-[#cbb8a0] rounded-2xl bg-[#efe7dc] shadow-inner">
             <div className="overflow-hidden rounded-xl HomeSwiper">
               <Swiper
                 modules={[Navigation, Autoplay]}
-                navigation
+                navigation={true}
                 autoplay={{
                   delay: 4000,
                   disableOnInteraction: false,
@@ -76,12 +112,13 @@ const HomeSlider = () => {
                 slidesPerView={1}
                 className="aspect-[16/9] w-full"
               >
-                {slides.map((slide) => (
-                  <SwiperSlide key={slide._id} className="flex items-center justify-center bg-white">
+                {slides.map((slide, index) => (
+                  <SwiperSlide key={slide._id || `home-slide-${index}`} className="flex items-center justify-center bg-white">
                     <img
-                      src={getImageUrl(slide.imageURL)}
-                      alt={slide.name}
-                      className="w-full h-full object-cover"
+                      src={getImageUrl(slide.imageURL || slide.image)}
+                      alt={slide.name || "Main Slide"}
+                      className="w-full h-full object-cover transition-opacity duration-500"
+                      onError={(e) => { e.target.src = "https://placehold.co/800x450?text=Image+Not+Found"; }}
                     />
                   </SwiperSlide>
                 ))}
