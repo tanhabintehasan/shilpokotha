@@ -1,230 +1,70 @@
-import React, { useState, useEffect } from "react";
-import { 
-  TextField, 
-  Button, 
-  Divider, 
-  Radio, 
-  RadioGroup, 
-  FormControlLabel, 
-  FormControl,
-  CircularProgress
-} from "@mui/material";
-import { MdOutlinePayments, MdLocalShipping, MdLock, MdCheckCircle } from "react-icons/md";
+import React, { useState } from "react";
+import { TextField, Button, CircularProgress } from "@mui/material";
 import { useCart } from "../../../Context/CartContext"; 
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const CheckOut = () => {
-  // Pull totalAmount directly from Context
   const { cartItems, totalAmount, clearCart } = useCart();
   const navigate = useNavigate();
-  
-  const [paymentMethod, setPaymentMethod] = useState("cod");
   const [loading, setLoading] = useState(false);
   const [isOrderPlaced, setIsOrderPlaced] = useState(false);
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    city: "",
-    address: "",
-    notes: ""
-  });
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "", phone: "", city: "", address: "" });
 
   const handlePlaceOrder = async () => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    
-    // 1. Validation
-    if (!formData.phone || !formData.address || !formData.firstName) {
-      alert("Please fill in all required shipping details.");
-      return;
-    }
+    const safeCart = Array.isArray(cartItems) ? cartItems : [];
 
-    if (!cartItems || cartItems.length === 0) {
-      alert("Your cart is empty!");
-      return;
-    }
-
-    // 2. Ensure totalAmount is a valid number
-    const finalTotal = Number(totalAmount);
-    if (isNaN(finalTotal) || finalTotal <= 0) {
-      alert("Invalid order total. Please check your cart.");
-      return;
+    if (!formData.phone || !formData.address || safeCart.length === 0) {
+      return alert("Complete your details and cart first.");
     }
 
     setLoading(true);
-
-    // 3. Construct payload to match Backend Controller
     const orderData = {
-      orderItems: cartItems.map(item => ({
+      orderItems: safeCart.map(item => ({
         name: item.name,
         qty: item.qty,
         price: Number(item.price),
-        product: item._id, // MongoDB ID
-        size: item.size || "N/A",
-        image: item.image
+        product: item.productId?._id || item.productId || item._id,
+        size: item.size || "M",
+        image: item.img || item.image
       })),
-      shippingAddress: {
-        name: `${formData.firstName} ${formData.lastName}`.trim(),
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-      },
-      paymentMethod: paymentMethod,
-      totalPrice: finalTotal, // This maps to 'total' in your controller logic
+      shippingAddress: { name: `${formData.firstName} ${formData.lastName}`, phone: formData.phone, address: formData.address, city: formData.city },
+      paymentMethod: "cod",
+      totalPrice: Number(totalAmount),
     };
 
     try {
-      const config = {
-        headers: { 
-          Authorization: userInfo?.token ? `Bearer ${userInfo.token}` : "",
-          "Content-Type": "application/json"
-        }
-      };
-
-      const response = await axios.post("http://localhost:5000/api/orders", orderData, config);
-      
-      if (response.status === 201 || response.status === 200) {
-        setIsOrderPlaced(true);
-        clearCart(); 
-        // Auto-redirect after 5 seconds
-        setTimeout(() => navigate("/"), 5000);
-      }
+      const config = { headers: { Authorization: userInfo?.token ? `Bearer ${userInfo.token}` : "" } };
+      await axios.post(`${BACKEND_URL}/api/orders`, orderData, config);
+      setIsOrderPlaced(true);
+      if (typeof clearCart === 'function') clearCart();
+      setTimeout(() => navigate("/"), 4000);
     } catch (err) {
-      console.error("Order Submission Error:", err);
-      alert(err.response?.data?.message || "Failed to place order. Connection error.");
-    } finally {
-      setLoading(false);
-    }
+      alert(err.response?.data?.message || "Order failed.");
+    } finally { setLoading(false); }
   };
 
-  if (isOrderPlaced) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4 text-center">
-        <MdCheckCircle className="text-green-500 text-8xl mb-4" />
-        <h2 className="text-3xl font-bold text-gray-800">Order Placed Successfully!</h2>
-        <p className="text-gray-600 mt-2">Total Amount Paid: ৳{totalAmount?.toLocaleString()}</p>
-        <p className="text-sm text-gray-400 mt-1">Redirecting to home page shortly...</p>
-        <Button 
-          variant="contained" 
-          onClick={() => navigate("/")}
-          sx={{ mt: 4, backgroundColor: "#691414", borderRadius: '50px', px: 4 }}
-        >
-          Back to Shopping
-        </Button>
-      </div>
-    );
-  }
+  if (isOrderPlaced) return <div className="text-center py-20"><h2>Order Success!</h2><p>Redirecting...</p></div>;
 
   return (
-    <section className="bg-[#f8f9fa] py-12 min-h-screen">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="flex flex-col lg:flex-row gap-8">
-          
-          {/* LEFT: FORM FIELDS */}
-          <div className="lg:w-2/3 space-y-6">
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-              <div className="flex items-center gap-2 mb-8">
-                <div className="bg-[#691414]/10 p-2 rounded-lg">
-                  <MdLocalShipping className="text-[#691414] text-2xl" />
-                </div>
-                <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tight">Shipping Details</h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <TextField fullWidth label="First Name *" name="firstName" value={formData.firstName} onChange={handleChange} variant="outlined" />
-                <TextField fullWidth label="Last Name" name="lastName" value={formData.lastName} onChange={handleChange} variant="outlined" />
-                <TextField fullWidth label="Email Address" name="email" value={formData.email} onChange={handleChange} variant="outlined" className="md:col-span-2" />
-                <TextField fullWidth label="Phone Number *" name="phone" value={formData.phone} onChange={handleChange} variant="outlined" />
-                <TextField fullWidth label="City *" name="city" value={formData.city} onChange={handleChange} variant="outlined" />
-                <TextField fullWidth label="Detailed Address *" name="address" value={formData.address} onChange={handleChange} variant="outlined" multiline rows={3} className="md:col-span-2" />
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT: ORDER SUMMARY & TOTAL */}
-          <div className="lg:w-1/3">
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 sticky top-6 overflow-hidden">
-              <div className="bg-[#691414] p-6 text-white text-center">
-                <h2 className="text-xl font-bold uppercase tracking-widest">Order Summary</h2>
-              </div>
-              
-              <div className="p-6">
-                <div className="max-h-[250px] overflow-y-auto mb-6 pr-2">
-                  {cartItems.map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-start py-3 border-b border-gray-50">
-                      <div>
-                        <p className="text-sm font-bold text-gray-800">{item.name}</p>
-                        <p className="text-xs text-gray-500">Qty: {item.qty} × ৳{item.price}</p>
-                      </div>
-                      <p className="font-bold text-gray-900">৳{(item.price * item.qty).toLocaleString()}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="bg-gray-50 p-4 rounded-2xl space-y-3">
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Subtotal</span>
-                    <span className="font-bold">৳{totalAmount?.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Shipping</span>
-                    <span className="text-green-600 font-bold uppercase text-[10px] bg-green-50 px-2 py-1 rounded">Free</span>
-                  </div>
-                  <Divider />
-                  <div className="flex justify-between items-center pt-2">
-                    <span className="text-lg font-bold text-gray-800">Total Amount</span>
-                    <span className="text-2xl font-black text-[#691414]">৳{totalAmount?.toLocaleString()}</span>
-                  </div>
-                </div>
-
-                <div className="mt-8">
-                  <p className="text-xs font-bold text-gray-400 uppercase mb-3 tracking-widest">Select Payment</p>
-                  <FormControl component="fieldset" className="w-full">
-                    <RadioGroup value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-                      <div className={`border-2 rounded-xl p-2 transition-all ${paymentMethod === "cod" ? "border-[#691414] bg-[#691414]/5" : "border-gray-100"}`}>
-                        <FormControlLabel 
-                          value="cod" 
-                          control={<Radio sx={{ color: "#691414", "&.Mui-checked": { color: "#691414" } }} />} 
-                          label={<span className="font-black text-gray-700 uppercase text-xs">Cash on Delivery</span>} 
-                        />
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                </div>
-
-                <Button
-                  variant="contained"
-                  fullWidth
-                  disabled={loading || cartItems.length === 0}
-                  onClick={handlePlaceOrder}
-                  sx={{ 
-                    backgroundColor: "#691414", 
-                    height: "65px", 
-                    borderRadius: "15px",
-                    fontWeight: "900", 
-                    fontSize: "1rem",
-                    mt: 4,
-                    boxShadow: "0 10px 20px -5px rgba(105, 20, 20, 0.4)",
-                    "&:hover": { backgroundColor: "#4a0e0e" },
-                  }}
-                >
-                  {loading ? <CircularProgress size={24} color="inherit" /> : `CONFIRM ORDER ৳${totalAmount?.toLocaleString()}`}
-                </Button>
-              </div>
-            </div>
-          </div>
-
-        </div>
+    <div className="container mx-auto p-4 flex flex-col md:flex-row gap-6">
+      <div className="md:w-2/3 bg-white p-6 rounded shadow">
+        <h3>Shipping Info</h3>
+        <TextField fullWidth label="First Name" margin="normal" onChange={e => setFormData({...formData, firstName: e.target.value})} />
+        <TextField fullWidth label="Phone" margin="normal" onChange={e => setFormData({...formData, phone: e.target.value})} />
+        <TextField fullWidth multiline rows={3} label="Address" margin="normal" onChange={e => setFormData({...formData, address: e.target.value})} />
       </div>
-    </section>
+      <div className="md:w-1/3 bg-gray-50 p-6 rounded shadow">
+        <h3>Summary</h3>
+        <p className="flex justify-between font-bold text-xl mt-4">Total: <span>৳{totalAmount.toLocaleString()}</span></p>
+        <Button fullWidth variant="contained" sx={{mt:3, bgcolor:'#691414'}} onClick={handlePlaceOrder} disabled={loading}>
+          {loading ? <CircularProgress size={20}/> : "CONFIRM ORDER"}
+        </Button>
+      </div>
+    </div>
   );
 };
-
 export default CheckOut;
