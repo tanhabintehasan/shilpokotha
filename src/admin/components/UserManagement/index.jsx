@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios"; // Import axios
+// axiosInstance ব্যবহার করলে আলাদা করে axios ইমপোর্ট করার প্রয়োজন নেই
+import axiosInstance from '../api/axiosInstance'; 
 import CommonTable from "../Ui/CommonTable";
 import { UserPlus, Shield, User, Mail, Calendar, Loader2 } from "lucide-react";
-import axiosInstance from '../api/axiosInstance';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- FETCH REAL USERS FROM DATABASE ---
+  // --- FETCH REAL USERS ---
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      const res = await axiosInstance.get("http://localhost:5000/api/users");
+      // FIX: localhost সরিয়ে শুধু রিলেটিভ পাথ ব্যবহার করা হয়েছে
+      const res = await axiosInstance.get("/api/users");
       setUsers(res.data);
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -29,7 +30,8 @@ const UserManagement = () => {
   const handleDelete = async (user) => {
     if (window.confirm(`Delete user ${user.name}?`)) {
       try {
-        await axios.delete(`http://localhost:5000/api/users/${user._id}`);
+        // FIX: axiosInstance ব্যবহার করা হয়েছে এবং লোকালহোস্ট সরানো হয়েছে
+        await axiosInstance.delete(`/api/users/${user._id}`);
         fetchUsers(); // Refresh table
       } catch (err) {
         alert(err.response?.data?.message || "Error deleting user");
@@ -37,6 +39,7 @@ const UserManagement = () => {
     }
   };
 
+  // --- TABLE COLUMNS ---
   const columns = [
     {
       header: "User Details",
@@ -44,7 +47,7 @@ const UserManagement = () => {
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-[#800020] font-bold text-xs">
-            {row.name.charAt(0)}
+            {row.name ? row.name.charAt(0) : "U"}
           </div>
           <div>
             <span className="font-bold text-gray-800 block text-sm">{row.name}</span>
@@ -60,9 +63,9 @@ const UserManagement = () => {
       key: "role",
       render: (row) => (
         <span className={`flex items-center gap-1 text-xs font-semibold ${
-          row.role.includes("admin") ? "text-[#800020]" : "text-blue-600"
+          row.role?.includes("admin") ? "text-[#800020]" : "text-blue-600"
         }`}>
-          {row.role.includes("admin") ? <Shield size={12} /> : <User size={12} />}
+          {row.role?.includes("admin") ? <Shield size={12} /> : <User size={12} />}
           {row.role}
         </span>
       ),
@@ -83,7 +86,7 @@ const UserManagement = () => {
       key: "joined",
       render: (row) => (
         <span className="text-xs text-gray-500 flex items-center gap-1">
-          <Calendar size={12} /> {new Date(row.joined).toLocaleDateString()}
+          <Calendar size={12} /> {row.joined ? new Date(row.joined).toLocaleDateString() : "N/A"}
         </span>
       ),
     },
@@ -99,11 +102,11 @@ const UserManagement = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-20"><Loader2 className="animate-spin" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="animate-spin text-[#800020]" /></div>
       ) : (
         <CommonTable 
           columns={columns} 
-          data={users} 
+          data={users || []} 
           onDelete={handleDelete}
         />
       )}

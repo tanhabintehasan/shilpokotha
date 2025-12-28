@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+// axios রিমুভ করে শুধু axiosInstance ব্যবহার করা হয়েছে
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { Link } from "react-router-dom";
@@ -12,7 +12,8 @@ const HomeCatSlider = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
+  // ইমেজ পাথের জন্য ব্যাকএন্ড ইউআরএল (Env থেকে অথবা সরাসরি লিংক)
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://shilpokotha-backend-8o4q410ae-tanhabintehasans-projects.vercel.app";
 
   const getImageUrl = (path) => {
     if (!path || path === "null" || path === "undefined") {
@@ -29,24 +30,19 @@ const HomeCatSlider = () => {
     let isMounted = true;
     setLoading(true);
 
-    axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/homecatslide`)
+    // FIX: axiosInstance ব্যবহার করার সময় baseURL অটোমেটিক যোগ হয়, তাই শুধু পাথ দিলেই হবে
+    axiosInstance.get('/api/product-slider/active/homecatslide')
       .then(res => {
         if (isMounted) {
-          // DEBUG: This will help us see the exact structure in production logs
-          console.log("Slider API Raw Response:", res.data);
-
           let finalArray = [];
           const rawData = res.data;
 
-          // DEEP SCAN LOGIC
           if (Array.isArray(rawData)) {
             finalArray = rawData;
           } else if (rawData && typeof rawData === 'object') {
-            // Priority 1: Check standard 'data' or 'categories' keys
             if (Array.isArray(rawData.data)) finalArray = rawData.data;
             else if (Array.isArray(rawData.categories)) finalArray = rawData.categories;
             else if (Array.isArray(rawData.items)) finalArray = rawData.items;
-            // Priority 2: Hunt for any key that contains an array
             else {
               const detectedArray = Object.values(rawData).find(val => Array.isArray(val));
               finalArray = detectedArray || [];
@@ -66,7 +62,7 @@ const HomeCatSlider = () => {
       });
 
     return () => { isMounted = false; };
-  }, [BACKEND_URL]);
+  }, []); // BACKEND_URL ডিপেন্ডেন্সি রিমুভ করা হয়েছে কারণ axiosInstance এটি হ্যান্ডেল করে
 
   if (loading) {
     return (
@@ -81,7 +77,6 @@ const HomeCatSlider = () => {
     );
   }
 
-  // PREVENT CRASH: If categories isn't an array yet, don't render the map
   if (!Array.isArray(categories) || categories.length === 0) {
     return null;
   }
@@ -92,7 +87,6 @@ const HomeCatSlider = () => {
         <Swiper
           spaceBetween={20}
           navigation={true}
-          // Dynamic loop based on actual array length
           loop={categories.length > 8}
           modules={[Navigation]}
           breakpoints={{

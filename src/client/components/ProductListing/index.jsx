@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+// axiosInstance ব্যবহার করলে আলাদা axios প্রয়োজন নেই
+import axiosInstance from '../api/axiosInstance';
 import SideBar from "../SideBar/Index";
 import ProductItem from "../ProductItem/Index";
 import ProductModal from "../ProductModal/index"; 
 import { useShop } from "../../../Context/ShopContext"; 
-import { useCart } from "../../../Context/CartContext"; // ADDED: Import useCart
+import { useCart } from "../../../Context/CartContext"; 
 import { IoGrid } from "react-icons/io5";
 import { MdOutlineFormatListBulleted } from "react-icons/md";
 import Pagination from "@mui/material/Pagination";
-import axiosInstance from '../api/axiosInstance';
 
 const ProductListing = () => {
   const navigate = useNavigate();
@@ -22,28 +22,35 @@ const ProductListing = () => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   
-  // FIXED: Get addToCart from useCart, and addToWishlist from useShop
   const { addToWishlist } = useShop(); 
   const { addToCart } = useCart(); 
 
   const productsPerPage = 8;
-  const BACKEND_URL = "";
 
+  // ফেচিং লজিক
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
+      // FIX: axiosInstance ব্যবহার করলে baseURL অটোমেটিক যুক্ত হয়
       const res = await axiosInstance.get('/api/products');
-      const allData = Array.isArray(res.data) ? res.data : res.data.products || [];
+      
+      // ডাটা স্ট্রাকচার চেক
+      const allData = Array.isArray(res.data) 
+        ? res.data 
+        : (res.data.products || res.data.data || []);
+
       const filtered = allData.filter(item => 
         item.designType === 'product' || item.designType === 'productslide'
       );
+      
       setProducts(filtered);
     } catch (err) {
       console.error("Error fetching products:", err);
+      setProducts([]); // এরর হলে খালি অ্যারে সেট করা নিরাপদ
     } finally {
       setLoading(false);
     }
-  }, [BACKEND_URL]);
+  }, []);
 
   useEffect(() => {
     fetchProducts();
@@ -60,6 +67,7 @@ const ProductListing = () => {
     setSelectedProduct(null);
   };
 
+  // সর্টিং লজিক
   const sortedProducts = useMemo(() => {
     const list = [...products];
     if (sortBy === "Price: Low to High") return list.sort((a, b) => a.price - b.price);
@@ -68,7 +76,11 @@ const ProductListing = () => {
     return list;
   }, [products, sortBy]);
 
-  const currentItems = sortedProducts.slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage);
+  // পেজিনেশন লজিক
+  const currentItems = sortedProducts.slice(
+    (currentPage - 1) * productsPerPage, 
+    currentPage * productsPerPage
+  );
 
   if (loading) return (
     <div className="h-screen flex items-center justify-center bg-[#d1c9bd]">
@@ -82,6 +94,7 @@ const ProductListing = () => {
   return (
     <section className="py-8 px-3 bg-[#d1c9bd] min-h-screen">
       <div className="container mx-auto flex flex-col lg:flex-row gap-6 items-start">
+        {/* SIDEBAR */}
         <div className="sidebarWrapper hidden lg:block lg:w-[280px] sticky top-4 self-start">
           <SideBar />
         </div>
@@ -91,15 +104,15 @@ const ProductListing = () => {
           <div className="productHeader flex flex-col md:flex-row gap-4 items-center justify-between bg-white/80 backdrop-blur-md p-5 rounded-3xl mb-8 shadow-sm border border-white/40">
             <div className="flex items-center gap-6">
               <div className="flex bg-gray-100 p-1 rounded-xl">
-                <button onClick={() => setView("grid")} className={`p-2.5 rounded-lg ${view === "grid" ? "bg-white text-[#891b1b]" : "text-gray-400"}`}><IoGrid size={20} /></button>
-                <button onClick={() => setView("list")} className={`p-2.5 rounded-lg ${view === "list" ? "bg-white text-[#891b1b]" : "text-gray-400"}`}><MdOutlineFormatListBulleted size={20} /></button>
+                <button onClick={() => setView("grid")} className={`p-2.5 rounded-lg transition-all ${view === "grid" ? "bg-white text-[#891b1b] shadow-sm" : "text-gray-400"}`}><IoGrid size={20} /></button>
+                <button onClick={() => setView("list")} className={`p-2.5 rounded-lg transition-all ${view === "list" ? "bg-white text-[#891b1b] shadow-sm" : "text-gray-400"}`}><MdOutlineFormatListBulleted size={20} /></button>
               </div>
               <span className="text-sm font-bold text-gray-600">Total <span className="text-[#891b1b]">{products.length}</span> Products</span>
             </div>
 
             <div className="flex items-center gap-3">
               <span className="text-[10px] font-black uppercase text-gray-400">Sort By</span>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-white border rounded-xl px-4 py-2 text-xs font-bold outline-none cursor-pointer">
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-white border rounded-xl px-4 py-2 text-xs font-bold outline-none cursor-pointer hover:border-[#891b1b] transition-colors">
                 <option>Newest Arrivals</option>
                 <option>Price: Low to High</option>
                 <option>Price: High to Low</option>
@@ -109,29 +122,42 @@ const ProductListing = () => {
           </div>
 
           {/* PRODUCT GRID/LIST */}
-          <div className={view === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "flex flex-col gap-6"}>
-            {currentItems.map((product) => (
-              <ProductItem 
-                key={product._id} 
-                item={product} 
-                view={view}
-                onQuickView={handleOpenModal}
-                addToCart={addToCart} // PASSED TO ITEM
-                addToWishlist={addToWishlist} // PASSED TO ITEM
-              />
-            ))}
-          </div>
+          {products.length === 0 ? (
+            <div className="text-center py-20 bg-white/50 rounded-3xl">
+              <p className="text-gray-500 font-bold">No products found in this category.</p>
+            </div>
+          ) : (
+            <div className={view === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "flex flex-col gap-6"}>
+              {currentItems.map((product) => (
+                <ProductItem 
+                  key={product._id} 
+                  item={product} 
+                  view={view}
+                  onQuickView={handleOpenModal}
+                  addToCart={addToCart}
+                  addToWishlist={addToWishlist}
+                />
+              ))}
+            </div>
+          )}
 
           {/* PAGINATION */}
-          <div className="mt-12 flex justify-center">
-             <Pagination 
-                count={Math.ceil(products.length / productsPerPage)} 
-                page={currentPage} 
-                onChange={(e, v) => setCurrentPage(v)} 
-                color="primary" 
-                sx={{ "& .Mui-selected": { backgroundColor: "#891b1b !important" } }}
-             />
-          </div>
+          {products.length > productsPerPage && (
+            <div className="mt-12 flex justify-center">
+               <Pagination 
+                  count={Math.ceil(products.length / productsPerPage)} 
+                  page={currentPage} 
+                  onChange={(e, v) => {
+                    setCurrentPage(v);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }} 
+                  sx={{ 
+                    "& .Mui-selected": { backgroundColor: "#891b1b !important", color: "white" },
+                    "& .MuiPaginationItem-root": { fontWeight: "bold" }
+                  }}
+               />
+            </div>
+          )}
         </div>
       </div>
 

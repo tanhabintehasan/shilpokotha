@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
+import axiosInstance from '../api/axiosInstance'; // ডাবল ইমপোর্ট ফিক্সড
+
+// Swiper Styles
 import "swiper/css";
 import "swiper/css/navigation";
-import axiosInstance from '../api/axiosInstance';
+import "swiper/css/autoplay";
 
 import ProductItem from "../ProductItem/Index";
 import ProductModal from "../ProductModal/index";
-import axiosInstance from '../api/axiosInstance';
+
 const ProductsSlider = () => {
   const [products, setProducts] = useState([]);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [viewProduct, setViewProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Vite environment variable fix
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
+  // ব্যাকএন্ড ইউআরএল ফিক্স (ইমেজ পাথের জন্য)
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://shilpokotha-backend-8o4q410ae-tanhabintehasans-projects.vercel.app";
 
   const getImageUrl = (path) => {
     if (!path || path === "null" || path === "undefined") {
@@ -37,26 +39,26 @@ const ProductsSlider = () => {
     const fetchSliderData = async () => {
       try {
         setLoading(true);
-        const res = await axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/productslide`);
+        // FIX: axiosInstance ব্যবহার করলে শুধু রিলেটিভ পাথ দিতে হবে
+        const res = await axiosInstance.get('/api/product-slider/active/productslide');
         
         if (isMounted) {
           const rawData = res.data;
           let finalArray = [];
 
-          // Robust Array Extraction (Deep Scan)
+          // Robust Array Extraction
           if (Array.isArray(rawData)) {
             finalArray = rawData;
           } else if (rawData && typeof rawData === 'object') {
-            if (Array.isArray(rawData.data)) finalArray = rawData.data;
-            else if (Array.isArray(rawData.products)) finalArray = rawData.products;
-            else if (Array.isArray(rawData.items)) finalArray = rawData.items;
-            else {
+            finalArray = rawData.data || rawData.products || rawData.items || [];
+            
+            if (!Array.isArray(finalArray)) {
               const foundArray = Object.values(rawData).find(val => Array.isArray(val));
               finalArray = foundArray || [];
             }
           }
 
-          // Process paths and safely map
+          // ইমেজ পাথ প্রসেস করা
           const processedData = finalArray.map(item => ({
             ...item,
             imageURL: getImageUrl(item.imageURL || item.image)
@@ -74,7 +76,7 @@ const ProductsSlider = () => {
 
     fetchSliderData();
     return () => { isMounted = false; };
-  }, [BACKEND_URL]);
+  }, []); // ডিপেন্ডেন্সি অ্যারে ক্লিন করা হয়েছে
 
   const openProductDetailsModal = (product) => {
     setViewProduct(product);
@@ -90,7 +92,6 @@ const ProductsSlider = () => {
     );
   }
 
-  // Prevent rendering if no products
   if (!Array.isArray(products) || products.length === 0) return null;
 
   return (

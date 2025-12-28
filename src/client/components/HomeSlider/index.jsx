@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 import axiosInstance from '../api/axiosInstance';
@@ -14,25 +13,21 @@ const HomeSlider = () => {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // VITE FIX: Standardizing the backend URL access
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
+  // ব্যাকএন্ড ইউআরএল হ্যান্ডেলিং
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://shilpokotha-backend-8o4q410ae-tanhabintehasans-projects.vercel.app";
 
   /**
    * Helper to resolve image paths correctly
-   * Standardized across all components (Contexts, Cart, Slider)
    */
   const getImageUrl = (path) => {
     if (!path || path === "null" || path === "undefined") {
       return "https://placehold.co/800x450?text=No+Image+Available";
     }
     
-    // If it's already a full URL, return it
     if (path.startsWith("http")) return path;
 
-    // Ensure the path starts with a slash
     const cleanPath = path.startsWith("/") ? path : `/${path}`;
     
-    // Handle standard 'uploads' folder logic
     return cleanPath.includes("uploads/") 
       ? `${BACKEND_URL}${cleanPath}` 
       : `${BACKEND_URL}/uploads${cleanPath}`;
@@ -44,21 +39,19 @@ const HomeSlider = () => {
     const fetchHomeSlides = async () => {
       try {
         setLoading(true);
-        // Using the exact route from your backend controller
-        const res = await axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/homeslide`);
+        // FIX: axiosInstance ব্যবহার করলে BACKEND_URL পাথের শুরুতে দেওয়ার দরকার নেই
+        const res = await axiosInstance.get('/api/product-slider/active/homeslide');
         
         if (isMounted) {
           const rawData = res.data;
           let finalArray = [];
 
-          // Robust Data Extraction: Prevents the "find is not a function" error
+          // Robust Data Extraction
           if (Array.isArray(rawData)) {
             finalArray = rawData;
           } else if (rawData && typeof rawData === 'object') {
-            // Check common response wrappers
             finalArray = rawData.data || rawData.slides || rawData.products || [];
             
-            // Final fallback: if it's an object but not the array itself, find the first array property
             if (!Array.isArray(finalArray)) {
               const foundArray = Object.values(rawData).find(val => Array.isArray(val));
               finalArray = foundArray || [];
@@ -77,7 +70,7 @@ const HomeSlider = () => {
 
     fetchHomeSlides();
     return () => { isMounted = false; };
-  }, [BACKEND_URL]);
+  }, []); // Dependency array cleanup
 
   if (loading) {
     return (
@@ -89,7 +82,6 @@ const HomeSlider = () => {
     );
   }
 
-  // If no slides, we hide the component to prevent an empty box on your homepage
   if (!Array.isArray(slides) || slides.length === 0) return null;
 
   return (
@@ -134,7 +126,7 @@ const HomeSlider = () => {
                       src={getImageUrl(slide.imageURL || slide.image)}
                       alt={slide.name || "Handcrafted Fashion Slide"}
                       className="w-full h-full object-cover"
-                      loading="priority"
+                      loading="eager"
                       onError={(e) => { 
                         e.target.onerror = null; 
                         e.target.src = "https://placehold.co/800x450?text=Image+Unavailable"; 

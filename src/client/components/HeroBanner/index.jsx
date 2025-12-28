@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+// axiosInstance ব্যবহার করলে আলাদা axios দরকার নেই
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import axiosInstance from '../api/axiosInstance';
@@ -13,8 +13,8 @@ const HeroBanner = () => {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Use Vite environment variable for the backend URL
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
+  // ইমেজ পাথের জন্য ব্যাকএন্ড ইউআরএল (Env থেকে অথবা সরাসরি লিংক)
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://shilpokotha-backend-8o4q410ae-tanhabintehasans-projects.vercel.app";
 
   /**
    * Safe Image Path Resolver
@@ -27,6 +27,7 @@ const HeroBanner = () => {
     
     const cleanPath = path.startsWith("/") ? path : `/${path}`;
     
+    // ব্যাকএন্ডে যদি অলরেডি আপলোড ফোল্ডার থাকে তবে তা হ্যান্ডেল করা
     return cleanPath.includes("uploads/") 
       ? `${BACKEND_URL}${cleanPath}` 
       : `${BACKEND_URL}/uploads${cleanPath}`;
@@ -38,13 +39,14 @@ const HeroBanner = () => {
     const fetchBanners = async () => {
       try {
         setLoading(true);
-        const res = await axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/bannerslide`);
+        // FIX: axiosInstance ব্যবহার করার সময় শুধু রিলেটিভ পাথ দিতে হবে
+        const res = await axiosInstance.get('/api/product-slider/active/bannerslide');
         
         if (isMounted) {
           const rawData = res.data;
           let finalArray = [];
 
-          // Robust Array Extraction (Prevents mapping crashes)
+          // ডাটা স্ট্রাকচার চেক (যাতে ম্যাপ এরর না দেয়)
           if (Array.isArray(rawData)) {
             finalArray = rawData;
           } else if (rawData && typeof rawData === 'object') {
@@ -52,7 +54,6 @@ const HeroBanner = () => {
             else if (Array.isArray(rawData.banners)) finalArray = rawData.banners;
             else if (Array.isArray(rawData.slides)) finalArray = rawData.slides;
             else {
-              // Final fallback: find any array property
               const foundArray = Object.values(rawData).find(val => Array.isArray(val));
               finalArray = foundArray || [];
             }
@@ -70,7 +71,7 @@ const HeroBanner = () => {
 
     fetchBanners();
     return () => { isMounted = false; };
-  }, [BACKEND_URL]);
+  }, []); // BACKEND_URL ডিপেন্ডেন্সি রিমুভ করা হয়েছে
 
   if (loading) {
     return (
@@ -80,11 +81,10 @@ const HeroBanner = () => {
     );
   }
 
-  // Hide component if no slides are available
   if (!Array.isArray(slides) || slides.length === 0) return null;
 
   return (
-    <div className="hero-banner-wrapper px-4 md:px-0">
+    <div className="hero-banner-wrapper px-4 md:px-0 mt-4">
       <Swiper
         spaceBetween={10}
         centeredSlides={true}

@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import axiosInstance from '../api/axiosInstance';
 
 export const ShopContext = createContext();
@@ -7,11 +6,13 @@ export const ShopContext = createContext();
 export const ShopProvider = ({ children }) => {
   const [wishlistItems, setWishlistItems] = useState([]); 
   const [isWishOpen, setIsWishOpen] = useState(false);
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
+  
+  // ব্যাকএন্ড ইউআরএল (ইমেজ বা অন্যান্য হার্ডকোডেড পাথের জন্য)
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://shilpokotha-backend.vercel.app";
 
-  // Helper to ensure we never run array methods on non-arrays
   const ensureArray = (data) => (Array.isArray(data) ? data : []);
 
+  // ইউজার ইনফো গেট করা
   const getUserAuth = useCallback(() => {
     const rawData = localStorage.getItem("userInfo");
     if (!rawData || rawData === "undefined" || rawData === "null") 
@@ -27,12 +28,13 @@ export const ShopProvider = ({ children }) => {
     }
   }, []);
 
+  // উইশলিস্ট ডাটা ফেচ করা
   const fetchWishlist = useCallback(async () => {
     const { userId, config } = getUserAuth();
     if (userId && config.headers?.Authorization) {
       try {
-        const { data } = await axiosInstance.get(`${BACKEND_URL}/api/wishlist/${userId}`, config);
-        // Robust extraction: API might return { items: [] } or just []
+        // FIX: axiosInstance ব্যবহার করলে রিলেটিভ পাথ দিতে হয়
+        const { data } = await axiosInstance.get(`/api/wishlist/${userId}`, config);
         const items = Array.isArray(data) ? data : (data?.items || []);
         setWishlistItems(ensureArray(items));
       } catch (err) { 
@@ -40,42 +42,42 @@ export const ShopProvider = ({ children }) => {
         setWishlistItems([]); 
       }
     }
-  }, [getUserAuth, BACKEND_URL]);
+  }, [getUserAuth]);
 
   useEffect(() => { 
     fetchWishlist(); 
   }, [fetchWishlist]);
 
+  // উইশলিস্টে আইটেম যোগ করা
   const addToWishlist = async (product) => {
     if (!product || !product._id) return;
     
     const { userId, config } = getUserAuth();
-    if (!userId) return alert("Please login first");
+    if (!userId) return alert("Please login first to add to wishlist");
     
+    // লোকাল স্টেট আপডেট
     setWishlistItems(prev => {
       const currentItems = ensureArray(prev);
-      
-      // Safety: Normalize the ID comparison to handle both populated objects and strings
       const exists = currentItems.some(w => {
         const wishId = w.productId?._id || w.productId || w._id;
         return wishId === product._id;
       });
 
       if (exists) return currentItems;
-
-      // Add with a normalized structure
       return [...currentItems, { ...product, productId: product._id }];
     });
 
+    // ব্যাকএন্ডে সেভ করা
     if (config.headers?.Authorization) {
       try { 
-        await axiosInstance.post(`${BACKEND_URL}/api/wishlist/add`, { userId, productId: product._id }, config); 
+        await axiosInstance.post('/api/wishlist/add', { userId, productId: product._id }, config); 
       } catch (err) { 
         console.error("Wishlist Sync Fail:", err.message); 
       }
     }
   };
 
+  // উইশলিস্ট থেকে রিমুভ করা
   const removeFromWishlist = async (id) => {
     if (!id) return;
 
@@ -90,7 +92,8 @@ export const ShopProvider = ({ children }) => {
     const { userId, config } = getUserAuth();
     if (userId && config.headers?.Authorization) {
       try { 
-        await axios.delete(`${BACKEND_URL}/api/wishlist/remove?userId=${userId}&productId=${id}`, config); 
+        // FIX: axios এর বদলে axiosInstance ব্যবহার করা হয়েছে
+        await axiosInstance.delete(`/api/wishlist/remove?userId=${userId}&productId=${id}`, config); 
       } catch (err) { 
         console.error("Wishlist Remove Fail:", err.message); 
       }
@@ -105,7 +108,7 @@ export const ShopProvider = ({ children }) => {
       isWishOpen, 
       setIsWishOpen, 
       getUserAuth,
-      fetchWishlist // Added to context in case you need to refresh manually
+      fetchWishlist 
     }}>
       {children}
     </ShopContext.Provider>
