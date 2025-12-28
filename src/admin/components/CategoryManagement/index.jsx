@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CommonTable from "../Ui/CommonTable";
 import { PlusCircle, X, LayoutGrid, Eye, Loader2, AlertCircle } from "lucide-react";
-import axiosInstance from '../api/axiosInstance';
+import axiosInstance from '../../../utils/axiosInstance';
 
 const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);

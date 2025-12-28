@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 // axiosInstance ইমপোর্ট নিশ্চিত করুন
-import axiosInstance from '../api/axiosInstance';
+import axiosInstance from '../../../utils/axiosInstance';
 import CommonTable from "../Ui/CommonTable";
 import {
   Upload, ArrowLeft, Image as ImageIcon, X, PlusCircle, Palette, Tag, DollarSign, Package,

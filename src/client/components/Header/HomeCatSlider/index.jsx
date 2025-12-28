@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { Link } from "react-router-dom";
-import axiosInstance from '../api/axiosInstance';
+import axiosInstance from '../../../../utils/axiosInstance';
 
 import "swiper/css";
 import "swiper/css/navigation";

@@ -5,7 +5,7 @@ import { useShop } from "../../../Context/ShopContext";
 import { useCart } from "../../../Context/CartContext"; 
 import { Rating, Button, Divider, IconButton } from "@mui/material";
 import { ShoppingCart, FavoriteBorder, Add, Remove } from "@mui/icons-material";
-import axiosInstance from '../api/axiosInstance';
+import axiosInstance from '../../../utils/axiosInstance';
 
 const ProductDetails = () => {
   const { id } = useParams();

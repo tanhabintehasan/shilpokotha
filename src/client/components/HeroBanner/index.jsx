@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 // axiosInstance ব্যবহার করলে আলাদা axios দরকার নেই
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
-import axiosInstance from '../api/axiosInstance';
+import axiosInstance from '../../../utils/axiosInstance';
 
 // Swiper styles
 import "swiper/css";

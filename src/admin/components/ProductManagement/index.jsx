@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 // Import axiosInstance (Make sure the path is correct)
-import axiosInstance from '../api/axiosInstance'; 
+import axiosInstance from '../../../utils/axiosInstance'; 
 import CommonTable from "../Ui/CommonTable";
 import {
   PlusCircle, Package, X, Search, UploadCloud,

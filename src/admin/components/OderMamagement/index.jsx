@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import CommonTable from "../Ui/CommonTable";
 import { Eye, Trash2, Loader2, RefreshCw } from "lucide-react";
-import axiosInstance from '../api/axiosInstance';
+import axiosInstance from '../../../utils';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
