@@ -7,7 +7,7 @@ import { MdOutlineShoppingCart } from "react-icons/md";
 import { FaHeart, FaRegUser } from "react-icons/fa"; 
 
 import CartBar from "../CartBar";
-import WishBar from "../Wishbar";
+import WishBar from "../WishBar";
 
 import { useShop } from "../../../Context/ShopContext";
 import { useCart } from "../../../Context/CartContext";
