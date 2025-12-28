@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
-import Button from "@mui/material/Button";
 import { IoClose } from "react-icons/io5";
 import { FaPlus, FaMinus } from "react-icons/fa6";
 
@@ -14,7 +13,6 @@ const Cetagorypanel = ({ isOpenCatPanel, setIsOpenCatPanel }) => {
   };
 
   const toggleSubmenu = (e, index) => {
-    // Prevent navigation when just clicking the toggle icon
     e.preventDefault();
     e.stopPropagation();
     setOpenIndex(openIndex === index ? null : index);
@@ -23,8 +21,8 @@ const Cetagorypanel = ({ isOpenCatPanel, setIsOpenCatPanel }) => {
   const categories = [
     { name: "Fashion", link: "/fashion", submenu: ["Traditional", "Handcrafted", "Contemporary", "Winter"] },
     { name: "Bags", link: "/bags", submenu: ["Hand Bags", "Tote Bags", "Jute Bags", "Backpacks"] },
-    { name: "Footwear", link: "/footwear", submenu: ["Traditional", "Leather Sandals", "Flats", "Sneakers", "Ethnic"] },
-    { name: "Beauty", link: "/beauty", submenu: ["Multani Mati", "Herbal Soaps", "Face Packs", "Local Products"] },
+    { name: "Footwear", link: "/footwear", submenu: ["Traditional Footwear", "Leather Sandals", "Flats", "Sneakers"] },
+    { name: "Beauty", link: "/beauty", submenu: ["Multani Mati", "Herbal Soaps", "Natural Face Packs"] },
     { name: "Jewellery", link: "/jewellery", submenu: ["Gold", "Silver", "Tribal", "Handmade"] },
     { name: "Wellness", link: "/wellness", submenu: ["Herbal Oils", "Natural Teas", "Traditional Remedies"] },
     { name: "Home Decor", link: "/home-decor", submenu: ["Bamboo & Cane", "Pottery", "Fabrics", "Brass Items"] },
@@ -37,13 +35,13 @@ const Cetagorypanel = ({ isOpenCatPanel, setIsOpenCatPanel }) => {
       onClose={toggleDrawer(false)}
       PaperProps={{ 
         sx: { 
-          backgroundColor: "#FDF7F0", // Softer cream background
+          backgroundColor: "#FDF7F0", 
           width: { xs: "280px", sm: "320px" },
-          borderRight: "4px solid #631212" // Maroon accent border
+          borderRight: "4px solid #631212"
         } 
       }}
-    </Drawer>
-      <Box sx={{ p: 0 }}>
+    >
+      <Box sx={{ p: 0, height: "100%", position: "relative" }}>
         {/* Header Section */}
         <div className="flex items-center justify-between p-5 bg-[#631212] text-white">
           <h3 className="text-[16px] font-semibold uppercase tracking-widest">Categories</h3>
@@ -74,7 +72,7 @@ const Cetagorypanel = ({ isOpenCatPanel, setIsOpenCatPanel }) => {
                   </button>
                 </div>
 
-                {/* Submenu with Smooth Transition */}
+                {/* Submenu */}
                 <div
                   className={`transition-all duration-500 ease-in-out overflow-hidden ${
                     openIndex === idx ? "max-h-[400px] mb-4" : "max-h-0"
@@ -99,8 +97,8 @@ const Cetagorypanel = ({ isOpenCatPanel, setIsOpenCatPanel }) => {
           </ul>
         </div>
 
-        {/* Branding Footer inside Drawer */}
-        <div className="absolute bottom-0 w-full p-6 text-center bg-[#FDF7F0]">
+        {/* Branding Footer */}
+        <div className="absolute bottom-0 w-full p-6 text-center bg-[#FDF7F0] border-t border-gray-100">
             <p className="text-[10px] text-gray-400 uppercase tracking-widest">
               Shilpokotha Tradition
             </p>
