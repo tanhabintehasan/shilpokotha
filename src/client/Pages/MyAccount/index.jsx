@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   TextField,
@@ -6,20 +6,18 @@ import {
   Avatar,
   Divider,
   Autocomplete,
-  Badge,
 } from "@mui/material";
 import {
   MdPerson,
   MdShoppingBag,
   MdLocationOn,
   MdLogout,
-  MdCameraAlt,
-  MdEdit,
   MdFavorite,
   MdArrowBack,
   MdShoppingCart
 } from "react-icons/md";
 import { useShop } from "../../../Context/ShopContext";
+import { useCart } from "../../../Context/CartContext"; // Correct Context Import
 
 const countryList = [
   { code: "BD", label: "Bangladesh", phone: "880" },
@@ -30,7 +28,10 @@ const countryList = [
 const MyAccount = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
-  const { wishlistItems, cartItems, removeItem, updateQty } = useShop();
+  
+  // Split the context imports correctly
+  const { wishlistItems } = useShop();
+  const { cartItems, removeItem, updateQty, totalAmount } = useCart();
 
   const [user, setUser] = useState({
     name: "User",
@@ -40,14 +41,19 @@ const MyAccount = () => {
   });
 
   useEffect(() => {
-    const savedUser = JSON.parse(localStorage.getItem("userInfo"));
-    if (savedUser) {
-      setUser({
-        name: savedUser.name || "User",
-        email: savedUser.email || "",
-        phone: savedUser.phone || "",
-        avatar: savedUser.avatar || "",
-      });
+    const rawData = localStorage.getItem("userInfo");
+    if (rawData && rawData !== "undefined" && rawData !== "null") {
+      try {
+        const savedUser = JSON.parse(rawData);
+        setUser({
+          name: savedUser.name || "User",
+          email: savedUser.email || "",
+          phone: savedUser.phone || "",
+          avatar: savedUser.avatar || "",
+        });
+      } catch (e) {
+        console.error("Failed to parse user info");
+      }
     }
   }, []);
 
@@ -57,12 +63,15 @@ const MyAccount = () => {
     window.location.reload(); 
   };
 
-  // Sidebar configuration with dynamic counts
+  // Safe checks for lengths
+  const safeCartItems = Array.isArray(cartItems) ? cartItems : [];
+  const safeWishlistItems = Array.isArray(wishlistItems) ? wishlistItems : [];
+
   const sidebarItems = [
     { id: "profile", label: "My Profile", icon: <MdPerson /> },
     { id: "orders", label: "My Orders", icon: <MdShoppingBag />, count: 0 },
-    { id: "cart", label: "My Cart", icon: <MdShoppingCart />, count: cartItems?.length || 0 },
-    { id: "wishlist", label: "My Wishlist", icon: <MdFavorite />, count: wishlistItems?.length || 0 },
+    { id: "cart", label: "My Cart", icon: <MdShoppingCart />, count: safeCartItems.length },
+    { id: "wishlist", label: "My Wishlist", icon: <MdFavorite />, count: safeWishlistItems.length },
     { id: "address", label: "Address", icon: <MdLocationOn /> },
   ];
 
@@ -70,7 +79,7 @@ const MyAccount = () => {
     <section className="bg-[#f8f9fa] py-12 min-h-screen">
       <div className="container mx-auto px-4 max-w-6xl">
         
-        {/* TOP NAVIGATION / BACK BUTTON */}
+        {/* TOP NAVIGATION */}
         <div className="mb-6 flex items-center justify-between">
             <Button 
                 onClick={() => navigate("/")} 
@@ -157,52 +166,69 @@ const MyAccount = () => {
               {activeTab === "cart" && (
                 <div className="animate-in fade-in duration-500">
                   <h2 className="text-2xl font-bold text-gray-800 mb-8">My Shopping Cart</h2>
-                  {cartItems.length === 0 ? (
-                    <div className="text-center py-10 text-gray-400">Your cart is currently empty.</div>
+                  {safeCartItems.length === 0 ? (
+                    <div className="text-center py-10">
+                        <MdShoppingCart className="text-6xl text-gray-100 mx-auto mb-4" />
+                        <p className="text-gray-400">Your cart is currently empty.</p>
+                        <Button onClick={() => navigate("/")} sx={{ mt: 2, color: "#691414" }}>Go Shopping</Button>
+                    </div>
                   ) : (
                     <div className="space-y-4">
-                      {cartItems.map((item) => (
-                        <div key={`${item.productId}-${item.size}`} className="flex items-center gap-4 p-4 border rounded-lg">
-                          <img src={item.img} alt={item.name} className="w-16 h-20 object-cover rounded" />
+                      {safeCartItems.map((item) => (
+                        <div key={`${item.productId}-${item.size}`} className="flex items-center gap-4 p-4 border rounded-lg hover:shadow-sm transition-shadow">
+                          <img src={item.img} alt={item.name} className="w-16 h-20 object-cover rounded shadow-sm" />
                           <div className="flex-1">
                             <h4 className="font-bold text-sm">{item.name}</h4>
-                            <p className="text-xs text-gray-500">Size: {item.size}</p>
+                            <p className="text-[10px] text-gray-400 uppercase tracking-wider">Size: {item.size}</p>
                             <p className="text-[#691414] font-bold">৳{item.price}</p>
                           </div>
-                          <div className="flex items-center gap-2">
-                             <button onClick={() => updateQty(item.productId, item.size, -1)} className="px-2 border rounded">-</button>
-                             <span className="text-sm font-bold">{item.qty}</span>
-                             <button onClick={() => updateQty(item.productId, item.size, 1)} className="px-2 border rounded">+</button>
+                          <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-1">
+                             <button onClick={() => updateQty(item.productId, item.size, -1)} className="w-8 h-8 flex items-center justify-center border rounded bg-white hover:bg-gray-100">-</button>
+                             <span className="text-sm font-bold w-4 text-center">{item.qty}</span>
+                             <button onClick={() => updateQty(item.productId, item.size, 1)} className="w-8 h-8 flex items-center justify-center border rounded bg-white hover:bg-gray-100">+</button>
                           </div>
-                          <Button onClick={() => removeItem(item.productId, item.size)} color="error">Remove</Button>
+                          <Button onClick={() => removeItem(item.productId, item.size)} color="error" size="small" sx={{ textTransform: 'none', fontWeight: 'bold' }}>Remove</Button>
                         </div>
                       ))}
-                      <div className="pt-6 border-t flex justify-between items-center">
-                         <h3 className="text-xl font-bold">Total: ৳{cartItems.reduce((acc, curr) => acc + (curr.price * curr.qty), 0).toLocaleString()}</h3>
-                         <Button variant="contained" sx={{ backgroundColor: "#691414" }} onClick={() => navigate("/checkout")}>Checkout Now</Button>
+                      <div className="pt-6 border-t mt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                         <h3 className="text-xl font-bold">Total: <span className="text-[#691414]">৳{totalAmount.toLocaleString()}</span></h3>
+                         <Button variant="contained" size="large" sx={{ backgroundColor: "#691414", px: 8, fontWeight: 'bold' }} onClick={() => navigate("/checkout")}>Checkout Now</Button>
                       </div>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* WISHLIST REDIRECT TAB (Optional: Show preview instead of redirect) */}
+              {/* WISHLIST TAB */}
               {activeTab === "wishlist" && (
-                <div className="text-center py-20">
-                    <MdFavorite className="text-6xl text-gray-200 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold mb-4">You have {wishlistItems.length} items saved</h3>
-                    <Button variant="contained" sx={{ backgroundColor: "#691414" }} onClick={() => navigate("/wishlist")}>
+                <div className="text-center py-20 animate-in fade-in duration-500">
+                    <MdFavorite className="text-6xl text-gray-100 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold mb-4">You have {safeWishlistItems.length} items saved</h3>
+                    <Button variant="contained" sx={{ backgroundColor: "#691414", fontWeight: 'bold' }} onClick={() => navigate("/wishlist")}>
                         Go to Wishlist Page
                     </Button>
                 </div>
               )}
 
-              {/* Empty state for Orders */}
+              {/* ORDERS TAB */}
               {activeTab === "orders" && (
-                  <div className="text-center py-20">
-                      <MdShoppingBag className="text-6xl text-gray-200 mx-auto mb-4" />
+                  <div className="text-center py-20 animate-in fade-in duration-500">
+                      <MdShoppingBag className="text-6xl text-gray-100 mx-auto mb-4" />
                       <h3 className="text-xl font-bold">No orders yet</h3>
                       <p className="text-gray-400 mt-2">When you buy items, they will appear here.</p>
+                      <Button onClick={() => navigate("/")} variant="outlined" sx={{ mt: 3, borderColor: "#691414", color: "#691414" }}>Start Shopping</Button>
+                  </div>
+              )}
+
+              {/* ADDRESS TAB */}
+              {activeTab === "address" && (
+                  <div className="animate-in fade-in duration-500">
+                      <h2 className="text-2xl font-bold text-gray-800 mb-8">Shipping Address</h2>
+                      <div className="p-10 border-2 border-dashed border-gray-100 rounded-xl text-center">
+                          <MdLocationOn className="text-5xl text-gray-200 mx-auto mb-4" />
+                          <p className="text-gray-400 mb-4">No address saved yet</p>
+                          <Button variant="outlined" sx={{ color: "#691414", borderColor: "#691414" }}>Add New Address</Button>
+                      </div>
                   </div>
               )}
 
