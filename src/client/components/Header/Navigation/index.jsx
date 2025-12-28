@@ -13,10 +13,11 @@ const Navigation = () => {
   const openCetagorypanel = () => {
     setIsOpenCatPanel(true);
   };
+
   return (
     <>
       {" "}
-      <nav className="py-4 bg-[#B89B7A]">
+      <nav className="py-4 bg-[#B89B7A] relative z-[999]">
         {" "}
         <div className="container flex items-center justify-end gap-3 ">
           {" "}
@@ -44,6 +45,8 @@ const Navigation = () => {
                   </Link>
                 </Button>
               </li>
+              
+              {/* Fashion Section */}
               <li className="list-none relative nav group">
                 <Button className="!px-[7px] !py-[5px]">
                   <Link
@@ -54,7 +57,6 @@ const Navigation = () => {
                   </Link>
                 </Button>
 
-                {/* Submenu: Now visible on group-hover */}
                 <div className="submenu absolute top-[100%] left-0 min-w-[160px] bg-[#B89B7A] shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                   <ul>
                     <li className="list-none w-full">
@@ -64,7 +66,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
                     <li className="list-none w-full">
                       <Link to="/products/handcrafted" className="w-full block">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start hover:!bg-[#a68a6a]">
@@ -72,18 +73,13 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
                     <li className="list-none w-full">
-                      <Link
-                        to="/products/contemporary"
-                        className="w-full block"
-                      >
+                      <Link to="/products/contemporary" className="w-full block">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start hover:!bg-[#a68a6a]">
                           Contemporary
                         </Button>
                       </Link>
                     </li>
-
                     <li className="list-none w-full">
                       <Link to="/products/winter" className="w-full block">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start hover:!bg-[#a68a6a]">
@@ -95,6 +91,7 @@ const Navigation = () => {
                 </div>
               </li>
 
+              {/* Bags Section */}
               <li className="list-none relative nav group">
                 <Button className="!px-[7px] !py-[5px]">
                   <Link
@@ -105,7 +102,6 @@ const Navigation = () => {
                   </Link>
                 </Button>
 
-                {/* Submenu becomes visible on group-hover */}
                 <div className="submenu absolute top-[100%] left-0 min-w-[180px] bg-[#B89B7A] shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                   <ul>
                     <li className="list-none w-full">
@@ -115,7 +111,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
                     <li className="list-none w-full">
                       <Link to="/products/tote-bags">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start hover:!bg-[#a68a6a]">
@@ -123,7 +118,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
                     <li className="list-none w-full">
                       <Link to="/products/jute-bags">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start hover:!bg-[#a68a6a]">
@@ -131,7 +125,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
                     <li className="list-none w-full">
                       <Link to="/products/backpacks">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start hover:!bg-[#a68a6a]">
@@ -142,7 +135,9 @@ const Navigation = () => {
                   </ul>
                 </div>
               </li>
-              <li className="list-none relative nav">
+
+              {/* Footwear Section */}
+              <li className="list-none relative nav group">
                 <Button className="!px-[7px] !py-[5px]">
                   <Link
                     to="/products/footwear"
@@ -152,7 +147,7 @@ const Navigation = () => {
                   </Link>
                 </Button>
 
-                <div className="submenu absolute top-[100%] left-0 min-w-[180px] bg-[#B89B7A] shadow-md opacity-0 invisible transition-all duration-300 z-50">
+                <div className="submenu absolute top-[100%] left-0 min-w-[180px] bg-[#B89B7A] shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                   <ul>
                     <li className="list-none w-full">
                       <Link to="/footwear/traditional">
@@ -161,7 +156,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
                     <li className="list-none w-full">
                       <Link to="/products/leather-sandals">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -169,7 +163,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
                     <li className="list-none w-full">
                       <Link to="/products/flats">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -177,7 +170,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
                     <li className="list-none w-full">
                       <Link to="/products/sneakers">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -185,7 +177,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
                     <li className="list-none w-full">
                       <Link to="/products/ethnic">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -197,7 +188,8 @@ const Navigation = () => {
                 </div>
               </li>
 
-              <li className="list-none relative nav">
+              {/* Beauty Section */}
+              <li className="list-none relative nav group">
                 <Button className="!px-[7px] !py-[5px]">
                   <Link
                     to="/products/beauty"
@@ -207,9 +199,8 @@ const Navigation = () => {
                   </Link>
                 </Button>
 
-                <div className="submenu absolute top-[100%] left-0 min-w-[180px] bg-[#B89B7A] shadow-md opacity-0 invisible transition-all duration-300 z-50">
+                <div className="submenu absolute top-[100%] left-0 min-w-[180px] bg-[#B89B7A] shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                   <ul>
-                    {/* Multani Mati */}
                     <li className="list-none w-full">
                       <Link to="/products/multani-mati">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -217,8 +208,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
-                    {/* Herbal Soaps */}
                     <li className="list-none w-full">
                       <Link to="/products/herbal-soaps">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -226,8 +215,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
-                    {/* Natural Face Packs */}
                     <li className="list-none w-full">
                       <Link to="/products/face-packs">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -235,8 +222,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
-                    {/* Other Bangladeshi Beauty Products */}
                     <li className="list-none w-full">
                       <Link to="/products/other-products">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -248,7 +233,8 @@ const Navigation = () => {
                 </div>
               </li>
 
-              <li className="list-none relative nav">
+              {/* Jewellery Section */}
+              <li className="list-none relative nav group">
                 <Button className="!px-[7px] !py-[5px]">
                   <Link
                     to="/products/jewellery"
@@ -258,9 +244,8 @@ const Navigation = () => {
                   </Link>
                 </Button>
 
-                <div className="submenu absolute top-[100%] left-0 min-w-[180px] bg-[#B89B7A] shadow-md opacity-0 invisible transition-all duration-300 z-50">
+                <div className="submenu absolute top-[100%] left-0 min-w-[180px] bg-[#B89B7A] shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                   <ul>
-                    {/* Gold Jewellery */}
                     <li className="list-none w-full">
                       <Link to="/products/gold">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -268,8 +253,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
-                    {/* Silver Jewellery */}
                     <li className="list-none w-full">
                       <Link to="/products/silver">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -277,8 +260,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
-                    {/* Tribal/Traditional Jewellery */}
                     <li className="list-none w-full">
                       <Link to="/products/tribal">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -286,8 +267,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
-                    {/* Handmade / Artisanal Jewellery */}
                     <li className="list-none w-full">
                       <Link to="/products/handmade">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -299,7 +278,8 @@ const Navigation = () => {
                 </div>
               </li>
 
-              <li className="list-none relative nav">
+              {/* Wellness Section */}
+              <li className="list-none relative nav group">
                 <Button className="!px-[7px] !py-[5px]">
                   <Link
                     to="/products/wellness"
@@ -309,9 +289,8 @@ const Navigation = () => {
                   </Link>
                 </Button>
 
-                <div className="submenu absolute top-[100%] left-0 min-w-[180px] bg-[#B89B7A] shadow-md opacity-0 invisible transition-all duration-300 z-50">
+                <div className="submenu absolute top-[100%] left-0 min-w-[180px] bg-[#B89B7A] shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                   <ul>
-                    {/* Herbal Oils */}
                     <li className="list-none w-full">
                       <Link to="/products/herbal-oils">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -319,8 +298,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
-                    {/* Natural Teas */}
                     <li className="list-none w-full">
                       <Link to="/products/natural-teas">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -328,8 +305,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
-                    {/* Traditional Remedies */}
                     <li className="list-none w-full">
                       <Link to="/products/traditional-remedies">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -337,8 +312,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
-                    {/* Other Local Wellness Products */}
                     <li className="list-none w-full">
                       <Link to="/products/other-products">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -350,7 +323,8 @@ const Navigation = () => {
                 </div>
               </li>
 
-              <li className="list-none relative nav">
+              {/* Home Decor Section */}
+              <li className="list-none relative nav group">
                 <Button className="!px-[7px] !py-[5px]">
                   <Link
                     to="/products/home-decor"
@@ -360,9 +334,8 @@ const Navigation = () => {
                   </Link>
                 </Button>
 
-                <div className="submenu absolute top-[100%] left-0 min-w-[180px] bg-[#B89B7A] shadow-md opacity-0 invisible transition-all duration-300 z-50">
+                <div className="submenu absolute top-[100%] left-0 min-w-[180px] bg-[#B89B7A] shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                   <ul>
-                    {/* Bamboo & Cane Products */}
                     <li className="list-none w-full">
                       <Link to="/products/bamboo-cane">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -370,8 +343,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
-                    {/* Pottery & Clay Items */}
                     <li className="list-none w-full">
                       <Link to="/products/pottery-clay">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -379,8 +350,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
-                    {/* Handcrafted Fabrics & Textiles */}
                     <li className="list-none w-full">
                       <Link to="/products/textiles">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -388,8 +357,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
-                    {/* Brass & Bell Metal Items */}
                     <li className="list-none w-full">
                       <Link to="/products/brass-bellmetal">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
@@ -397,8 +364,6 @@ const Navigation = () => {
                         </Button>
                       </Link>
                     </li>
-
-                    {/* Other Traditional Home Decor */}
                     <li className="list-none w-full">
                       <Link to="/products/other-products">
                         <Button className="!text-[13px] !text-black !normal-case font-[400] w-full !text-left !justify-start">
