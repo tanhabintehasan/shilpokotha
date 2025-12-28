@@ -12,7 +12,7 @@ import BlogItem from "../../components/BlogItem";
 import HeroBanner from "../../components/HeroBanner";
 
 const Home = () => {
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "";
   const [value, setValue] = React.useState(0);
 
   // ডাটা স্টেটসমূহ

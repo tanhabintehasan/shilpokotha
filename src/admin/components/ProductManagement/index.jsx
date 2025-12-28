@@ -7,7 +7,7 @@ import {
 
 const ProductManagement = () => {
   // --- CONFIG ---
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "";
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);

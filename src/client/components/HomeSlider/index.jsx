@@ -8,7 +8,7 @@ import "./HomeSlider.css";
 const HomeSlider = () => {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "";
 
   // --- ইমেজ লজিক (আপনার ম্যানেজমেন্ট টেবিল থেকে নেওয়া) ---
   const getImageUrl = (path) => {

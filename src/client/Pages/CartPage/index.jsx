@@ -9,7 +9,7 @@ const CartPage = () => {
   const { cartItems, removeItem, updateQty } = useCart();
 
   const getDisplayImage = (item) => {
-    const BACKEND_URL = "http://localhost:5000";
+    const BACKEND_URL = "";
     const rawPath = item.productId?.images?.[0] || item.productId?.image || item.img || item.image;
 
     if (!rawPath || rawPath === "undefined" || rawPath === "null") {

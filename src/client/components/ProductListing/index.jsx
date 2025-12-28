@@ -26,7 +26,7 @@ const ProductListing = () => {
   const { addToCart } = useCart(); 
 
   const productsPerPage = 8;
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "";
 
   const fetchProducts = useCallback(async () => {
     try {

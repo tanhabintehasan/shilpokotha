@@ -6,7 +6,7 @@ export const ShopContext = createContext();
 export const ShopProvider = ({ children }) => {
   const [wishlistItems, setWishlistItems] = useState([]); 
   const [isWishOpen, setIsWishOpen] = useState(false);
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "";
 
   const getUserAuth = useCallback(() => {
     const rawData = localStorage.getItem("userInfo");

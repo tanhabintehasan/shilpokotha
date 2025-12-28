@@ -12,7 +12,7 @@ const ProductDetails = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
   const { addToWishlist } = useShop();
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "";
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);

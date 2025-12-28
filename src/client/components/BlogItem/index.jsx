@@ -13,7 +13,7 @@ const BlogItem = () => {
   const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "";
 
   // --- IMAGE LOGIC (Same as your HomeSlider) ---
   const getImageUrl = (path) => {

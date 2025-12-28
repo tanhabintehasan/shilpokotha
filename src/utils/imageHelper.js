@@ -1,5 +1,5 @@
 export const getImageUrl = (item) => {
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "";
 
   // 1. Unified path search: Looks at cart/wishlist structure AND direct product objects
   const path = 

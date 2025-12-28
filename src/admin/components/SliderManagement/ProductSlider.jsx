@@ -14,7 +14,7 @@ const ProductSlider = () => {
 
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "";
 
 
 

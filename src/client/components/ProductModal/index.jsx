@@ -13,7 +13,7 @@ const ProductModal = ({ closeModal, product }) => {
   // FIXED: Destructure from useCart() hook to use the drawer-opening logic
   const { addToCart } = useCart();
   
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "";
 
   const getImageUrl = (imgSource) => {
     if (!imgSource || imgSource === "undefined" || imgSource === "null") {

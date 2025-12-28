@@ -9,7 +9,7 @@ const WishPage = () => {
   const { wishlistItems = [], removeFromWishlist, addToCart } = useShop();
 
   const getDisplayImage = (item) => {
-    const BACKEND_URL = "http://localhost:5000";
+    const BACKEND_URL = "";
     const rawPath = item.productId?.imageURL || item.productId?.image || item.imageURL || item.img || item.image;
 
     if (!rawPath || rawPath === "undefined") return "https://placehold.co/150x200?text=No+Image";

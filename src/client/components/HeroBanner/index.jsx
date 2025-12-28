@@ -11,7 +11,7 @@ import "swiper/css/navigation";
 const HeroBanner = () => {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "";
 
   // --- ইমেজ পাথ হ্যান্ডলিং লজিক ---
   const getImageUrl = (path) => {

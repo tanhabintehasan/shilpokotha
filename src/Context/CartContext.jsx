@@ -6,7 +6,7 @@ export const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "";
 
   // --- NEW: TOTAL AMOUNT CALCULATION ---
   // This calculates the total price of all items in the cart

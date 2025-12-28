@@ -20,7 +20,7 @@ const CartBar = () => {
    * Handles relative paths, full URLs, and missing images
    */
   const getDisplayImage = (item) => {
-    const BACKEND_URL = "http://localhost:5000";
+    const BACKEND_URL = "";
     
     // Check for nested productId image (DB population) or flat img field (local state)
     const rawPath = item.img || item.image || item.productId?.images?.[0] || item.productId?.image;

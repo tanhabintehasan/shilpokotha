@@ -14,7 +14,7 @@ const ProductsSlider = () => {
   const [viewProduct, setViewProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "";
 
   // --- অ্যাডমিন প্যানেল থেকে আনা একই ইমেজ লজিক ---
   const getImageUrl = (path) => {
