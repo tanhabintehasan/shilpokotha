@@ -35,7 +35,7 @@ const ProductDetails = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get(`${BACKEND_URL}/api/products/${id}`);
+        const { data } = await axiosInstance.get(`${BACKEND_URL}/api/products/${id}`);
         if (data) {
           setProduct(data);
           const imagesArray = Array.isArray(data.images) ? data.images : [];

@@ -22,7 +22,7 @@ const ProductSlider = () => {
     try {
       setLoading(true);
       // Calling /all/product to match the designType 'product' in your schema
-      const res = await axios.get(`${BACKEND_URL}/api/product-slider/all/product`);
+      const res = await axiosInstance.get(`${BACKEND_URL}/api/product-slider/all/product`);
       
       // CRITICAL FIX: Ensure we only set an array to state
       const data = Array.isArray(res.data) ? res.data : [];

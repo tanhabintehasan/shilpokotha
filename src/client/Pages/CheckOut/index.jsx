@@ -38,7 +38,7 @@ const CheckOut = () => {
 
     try {
       const config = { headers: { Authorization: userInfo?.token ? `Bearer ${userInfo.token}` : "" } };
-      await axios.post(`${BACKEND_URL}/api/orders`, orderData, config);
+      await axios.paxiosInstance.postost(`${BACKEND_URL}/api/orders`, orderData, config);
       setIsOrderPlaced(true);
       if (typeof clearCart === 'function') clearCart();
       setTimeout(() => navigate("/"), 4000);

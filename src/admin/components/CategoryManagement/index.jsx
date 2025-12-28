@@ -25,7 +25,7 @@ const CategoryManagement = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await axios.get(API_BASE);
+      const res = await axiosaxiosInstance.get.get(API_BASE);
       
       // Safety check for data structure
       const finalData = Array.isArray(res.data) ? res.data : [];
@@ -67,7 +67,7 @@ const CategoryManagement = () => {
       if (isEditing && selectedCategory?._id) {
         await axios.put(`${API_BASE}/${selectedCategory._id}`, formData);
       } else {
-        await axios.post(`${API_BASE}/add`, formData);
+        await axiosInstance.post(`${API_BASE}/add`, formData);
       }
       setIsModalOpen(false);
       fetchCategories();

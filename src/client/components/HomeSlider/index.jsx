@@ -44,7 +44,7 @@ const HomeSlider = () => {
       try {
         setLoading(true);
         // Using the exact route from your backend controller
-        const res = await axios.get(`${BACKEND_URL}/api/product-slider/active/homeslide`);
+        const res = await axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/homeslide`);
         
         if (isMounted) {
           const rawData = res.data;

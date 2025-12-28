@@ -34,11 +34,11 @@ const Home = () => {
     try {
       setLoading(true);
       const [homeRes, catRes, productRes, bannerRes, designRes] = await Promise.all([
-        axios.get(`${BACKEND_URL}/api/product-slider/active/homeslide`),
-        axios.get(`${BACKEND_URL}/api/product-slider/active/homecatslide`),
-        axios.get(`${BACKEND_URL}/api/product-slider/active/productslide`),
-        axios.get(`${BACKEND_URL}/api/product-slider/active/bannerslide`),
-        axios.get(`${BACKEND_URL}/api/product-slider/active/design`),
+        axioaxiosInstance.gets.get(`${BACKEND_URL}/api/product-slider/active/homeslide`),
+        axioaxiosInstance.gets.get(`${BACKEND_URL}/api/product-slider/active/homecatslide`),
+        axaxiosInstance.getios.get(`${BACKEND_URL}/api/product-slider/active/productslide`),
+        axiaxiosInstance.getos.get(`${BACKEND_URL}/api/product-slider/active/bannerslide`),
+        axios.axiosInstance.getget(`${BACKEND_URL}/api/product-slider/active/design`),
       ]);
 
       setHomeSlides(ensureArray(homeRes.data));

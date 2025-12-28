@@ -55,7 +55,7 @@ const ProductManagement = () => {
    */
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await axios.get(`${BACKEND_URL}/api/products`);
+      const response = await axiosInstance.get(`${BACKEND_URL}/api/products`);
       const rawData = response.data;
       
       // x.find Fix: Ensure we always have an array
@@ -77,7 +77,7 @@ const ProductManagement = () => {
 
   const fetchCategories = async () => {
     try {
-      const catRes = await axios.get(`${BACKEND_URL}/api/categories`);
+      const catRes = await axiosInstance.get(`${BACKEND_URL}/api/categories`);
       const rawCat = catRes.data;
       
       let finalCats = [];

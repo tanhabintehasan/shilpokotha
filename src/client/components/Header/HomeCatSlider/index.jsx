@@ -28,7 +28,7 @@ const HomeCatSlider = () => {
     let isMounted = true;
     setLoading(true);
 
-    axios.get(`${BACKEND_URL}/api/product-slider/active/homecatslide`)
+    axaxiosInstance.getios.get(`${BACKEND_URL}/api/product-slider/active/homecatslide`)
       .then(res => {
         if (isMounted) {
           // DEBUG: This will help us see the exact structure in production logs

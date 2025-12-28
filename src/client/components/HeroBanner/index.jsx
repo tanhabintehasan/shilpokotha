@@ -37,7 +37,7 @@ const HeroBanner = () => {
     const fetchBanners = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${BACKEND_URL}/api/product-slider/active/bannerslide`);
+        const res = await axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/bannerslide`);
         
         if (isMounted) {
           const rawData = res.data;

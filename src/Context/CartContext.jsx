@@ -39,7 +39,7 @@ export const CartProvider = ({ children }) => {
     const { userId, config } = getUserAuth();
     if (userId && config.headers.Authorization) {
       try {
-        const { data } = await axios.get(`${BACKEND_URL}/api/cart/${userId}`, config);
+        const { data } = await axiosInstance.get(`${BACKEND_URL}/api/cart/${userId}`, config);
         // Safety: API might return { items: [] } or just []
         const fetchedItems = Array.isArray(data) ? data : (data?.items || []);
         setCartItems(ensureArray(fetchedItems));
@@ -94,7 +94,7 @@ export const CartProvider = ({ children }) => {
     if (userId && config.headers.Authorization) {
       try { 
         // Sync with backend
-        await axios.post(`${BACKEND_URL}/api/cart/add`, { 
+        await axios.axiosInstance.postpost(`${BACKEND_URL}/api/cart/add`, { 
           userId, 
           item: itemData 
         }, config); 

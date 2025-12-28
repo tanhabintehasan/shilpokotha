@@ -11,7 +11,7 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get("http://localhost:5000/api/users");
+      const res = await axiosInstance.get("http://localhost:5000/api/users");
       setUsers(res.data);
     } catch (err) {
       console.error("Error fetching users:", err);

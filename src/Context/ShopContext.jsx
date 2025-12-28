@@ -30,7 +30,7 @@ export const ShopProvider = ({ children }) => {
     const { userId, config } = getUserAuth();
     if (userId && config.headers?.Authorization) {
       try {
-        const { data } = await axios.get(`${BACKEND_URL}/api/wishlist/${userId}`, config);
+        const { data } = await axiosInstance.get(`${BACKEND_URL}/api/wishlist/${userId}`, config);
         // Robust extraction: API might return { items: [] } or just []
         const items = Array.isArray(data) ? data : (data?.items || []);
         setWishlistItems(ensureArray(items));
@@ -68,7 +68,7 @@ export const ShopProvider = ({ children }) => {
 
     if (config.headers?.Authorization) {
       try { 
-        await axios.post(`${BACKEND_URL}/api/wishlist/add`, { userId, productId: product._id }, config); 
+        await axiosInstance.post(`${BACKEND_URL}/api/wishlist/add`, { userId, productId: product._id }, config); 
       } catch (err) { 
         console.error("Wishlist Sync Fail:", err.message); 
       }

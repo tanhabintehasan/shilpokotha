@@ -1,8 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
-import path from "dotenv";
+import path from "path"; // duplicate import path removed
 import { fileURLToPath } from "url";
-import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
@@ -33,12 +32,6 @@ const PORT = process.env.PORT || 5000;
 // Connect to Database
 connectDB();
 
-// Ensure Upload Directory Exists (Note: Vercel is read-only; this works for local dev)
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
 // --- GLOBAL MIDDLEWARE ---
 app.use(helmet({
     crossOriginResourcePolicy: false,
@@ -48,12 +41,21 @@ app.use(helmet({
 app.use(morgan("dev"));
 
 // --- UPDATED CORS FOR PRODUCTION ---
+// এখানে আপনার ফ্রন্টএন্ডের মেইন ডোমেইন এবং ভেরসেল ডোমেইন দুটোই এলাউ করুন
 app.use(cors({
-    origin: [
-        "http://localhost:5173", 
-        "http://127.0.0.1:5173",
-        "https://shilpokotha-bd9w7g2me-tanhabintehasans-projects.vercel.app"
-    ],
+    origin: function (origin, callback) {
+        const allowedOrigins = [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "https://shilpokotha.vercel.app", // আপনার ফ্রন্টএন্ড মেইন লিংক
+            /\.vercel\.app$/ // এটি ভেরসেলের সব সাবডোমেইন এলাউ করবে
+        ];
+        if (!origin || allowedOrigins.some(o => typeof o === 'string' ? o === origin : o.test(origin))) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
 }));
@@ -62,7 +64,12 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use("/uploads", express.static(uploadDir));
+
+// Static Files (Local Dev এর জন্য)
+const uploadDir = path.join(__dirname, "uploads");
+if (fs.existsSync(uploadDir)) {
+    app.use("/uploads", express.static(uploadDir));
+}
 
 // --- API ROUTES ---
 app.use("/api/products", productRoutes);
@@ -97,13 +104,11 @@ app.use((err, req, res, next) => {
 });
 
 // --- SERVER INITIALIZATION ---
-// On Vercel, the environment is treated as production and the app is managed as a serverless function.
-// We only call app.listen() when running locally.
+// Vercel এ deploy করলে listen() দরকার নেই, তবে লোকালহোস্টের জন্য এটি লাগবে
 if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => {
         console.log(`🚀 Local server running on http://localhost:${PORT}`);
     });
 }
 
-// Export for Vercel
 export default app;

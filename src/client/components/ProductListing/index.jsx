@@ -31,7 +31,7 @@ const ProductListing = () => {
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${BACKEND_URL}/api/products`);
+      const res = await axiosInstance.get('/api/products');
       const allData = Array.isArray(res.data) ? res.data : res.data.products || [];
       const filtered = allData.filter(item => 
         item.designType === 'product' || item.designType === 'productslide'

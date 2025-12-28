@@ -51,7 +51,7 @@ const Login = () => {
     setError("");
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/signup", formData);
+      const response = await axiosInstance.post("http://localhost:5000/api/auth/signup", formData);
       if (response.status === 201) {
         setView("success");
         setFormData({ name: "", email: "", password: "" });
@@ -68,7 +68,7 @@ const Login = () => {
     setError("");
     setLoading(true);
     try {
-      const response = await axios.post("/api/auth/login", {
+      const response = await axioaxiosInstance.posts.post("/api/auth/login", {
         email: formData.email,
         password: formData.password,
       });

@@ -33,7 +33,7 @@ const BlogItem = () => {
     const fetchBlogs = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${BACKEND_URL}/api/products?designType=blog`);
+        const res = await axioaxiosInstance.gets.get(`${BACKEND_URL}/api/products?designType=blog`);
         
         // Defensive data check
         const data = Array.isArray(res.data) 

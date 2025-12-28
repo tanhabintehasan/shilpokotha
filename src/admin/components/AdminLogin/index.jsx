@@ -26,7 +26,7 @@ const AdminLogin = () => {
 
     try {
       // 1. Pointing to the dedicated ADMIN endpoint (matching our new structure)
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         "http://localhost:5000/api/admin/login",
         { email, password }
       );

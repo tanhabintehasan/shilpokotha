@@ -52,7 +52,7 @@ async function seedDB() {
   
   for (const category of categoriesData) {
     try {
-      const response = await axios.post(API_URL, category);
+      const response = await axioaxiosInstance.posts.post(API_URL, category);
       console.log(`✅ Created: ${category.name}`);
     } catch (error) {
       console.error(`❌ Failed: ${category.name} - ${error.response?.data?.message || error.message}`);

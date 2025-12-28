@@ -28,7 +28,7 @@ const OrderManagement = () => {
   const fetchOrders = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get(`${BACKEND_URL}/api/orders`, getAdminConfig());
+      const res = await axiosInstance.get(`${BACKEND_URL}/api/orders`, getAdminConfig());
       // Safety: ensure data is always an array
       const data = Array.isArray(res.data) ? res.data : (res.data?.orders || []);
       setOrders(data);

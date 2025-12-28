@@ -124,7 +124,7 @@ const SliderManagement = () => {
 
     try {
 
-      const res = await axios.get(`${BACKEND_URL}/api/product-slider/active/${zoneId}`);
+      const res = await axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/${zoneId}`);
 
       setSliders(Array.isArray(res.data) ? res.data : []);
 

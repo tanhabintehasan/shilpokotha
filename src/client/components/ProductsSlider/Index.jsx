@@ -36,7 +36,7 @@ const ProductsSlider = () => {
     const fetchSliderData = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${BACKEND_URL}/api/product-slider/active/productslide`);
+        const res = await axiosInstance.get(`${BACKEND_URL}/api/product-slider/active/productslide`);
         
         if (isMounted) {
           const rawData = res.data;
