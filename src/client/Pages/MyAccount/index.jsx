@@ -6,7 +6,7 @@ import {
   Avatar,
   Divider,
   Autocomplete,
-  Box,
+  Badge,
 } from "@mui/material";
 import {
   MdPerson,
@@ -15,21 +15,23 @@ import {
   MdLogout,
   MdCameraAlt,
   MdEdit,
-  MdFavoriteBorder,
+  MdFavorite,
+  MdArrowBack,
+  MdShoppingCart
 } from "react-icons/md";
+import { useShop } from "../../../Context/ShopContext";
 
 const countryList = [
   { code: "BD", label: "Bangladesh", phone: "880" },
   { code: "IN", label: "India", phone: "91" },
   { code: "US", label: "United States", phone: "1" },
-  // ... rest of your countries
 ];
 
 const MyAccount = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
-  
-  // 1. Load Real User Data from LocalStorage
+  const { wishlistItems, cartItems, removeItem, updateQty } = useShop();
+
   const [user, setUser] = useState({
     name: "User",
     email: "",
@@ -43,60 +45,59 @@ const MyAccount = () => {
       setUser({
         name: savedUser.name || "User",
         email: savedUser.email || "",
-        phone: savedUser.phone || "+880 1XXX-XXXXXX",
+        phone: savedUser.phone || "",
         avatar: savedUser.avatar || "",
       });
     }
   }, []);
 
-  // 2. Integrated Logout Logic
   const handleLogout = () => {
     localStorage.removeItem("userInfo");
-    localStorage.removeItem("userToken");
     navigate("/login");
-    window.location.reload(); // Ensures state is fully wiped
+    window.location.reload(); 
   };
 
+  // Sidebar configuration with dynamic counts
   const sidebarItems = [
     { id: "profile", label: "My Profile", icon: <MdPerson /> },
-    { id: "orders", label: "My Orders", icon: <MdShoppingBag /> },
-    { id: "wishlist", label: "My List", icon: <MdFavoriteBorder /> },
+    { id: "orders", label: "My Orders", icon: <MdShoppingBag />, count: 0 },
+    { id: "cart", label: "My Cart", icon: <MdShoppingCart />, count: cartItems?.length || 0 },
+    { id: "wishlist", label: "My Wishlist", icon: <MdFavorite />, count: wishlistItems?.length || 0 },
     { id: "address", label: "Address", icon: <MdLocationOn /> },
   ];
-
-  const handleTabClick = (id) => {
-    if (id === "wishlist") {
-      navigate("/wishlist");
-    } else {
-      setActiveTab(id);
-    }
-  };
 
   return (
     <section className="bg-[#f8f9fa] py-12 min-h-screen">
       <div className="container mx-auto px-4 max-w-6xl">
+        
+        {/* TOP NAVIGATION / BACK BUTTON */}
+        <div className="mb-6 flex items-center justify-between">
+            <Button 
+                onClick={() => navigate("/")} 
+                startIcon={<MdArrowBack />}
+                sx={{ color: '#666', textTransform: 'none', fontWeight: 'bold' }}
+            >
+                Back to Shop
+            </Button>
+            {activeTab !== "profile" && (
+                <Button 
+                    onClick={() => setActiveTab("profile")}
+                    sx={{ color: '#691414', textTransform: 'none', fontWeight: 'bold' }}
+                >
+                    Account Dashboard
+                </Button>
+            )}
+        </div>
+
         <div className="flex flex-col md:flex-row gap-8">
-          
           {/* LEFT SIDEBAR */}
           <div className="w-full md:w-1/4">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden sticky top-4">
               <div className="p-6 text-center bg-[#691414]/5">
                 <div className="relative w-24 h-24 mx-auto mb-4">
-                  <Avatar
-                    src={user.avatar}
-                    sx={{
-                      width: 96,
-                      height: 96,
-                      bgcolor: "#691414",
-                      fontSize: "2rem",
-                    }}
-                  >
+                  <Avatar src={user.avatar} sx={{ width: 96, height: 96, bgcolor: "#691414", fontSize: "2.5rem" }}>
                     {user.name.charAt(0)}
                   </Avatar>
-                  <label className="absolute bottom-0 right-0 bg-white p-1.5 rounded-full shadow-md cursor-pointer border border-gray-100 hover:bg-gray-50 transition-colors">
-                    <MdCameraAlt className="text-[#691414]" />
-                    <input type="file" className="hidden" />
-                  </label>
                 </div>
                 <h3 className="font-bold text-gray-800 text-lg leading-tight">{user.name}</h3>
                 <p className="text-gray-500 text-xs mt-1">{user.email}</p>
@@ -106,27 +107,25 @@ const MyAccount = () => {
                 {sidebarItems.map((item) => (
                   <button
                     key={item.id}
-                    onClick={() => handleTabClick(item.id)}
-                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-bold transition-all mb-1 ${
-                      activeTab === item.id
-                        ? "bg-[#691414] text-white shadow-md"
-                        : "text-gray-600 hover:bg-gray-50"
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-bold transition-all mb-1 ${
+                      activeTab === item.id ? "bg-[#691414] text-white shadow-md" : "text-gray-600 hover:bg-gray-50"
                     }`}
                   >
-                    <span className="text-xl">{item.icon}</span>
-                    {item.label}
+                    <div className="flex items-center gap-4">
+                        <span className="text-xl">{item.icon}</span>
+                        {item.label}
+                    </div>
+                    {item.count > 0 && (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${activeTab === item.id ? 'bg-white text-[#691414]' : 'bg-gray-100 text-gray-500'}`}>
+                            {item.count}
+                        </span>
+                    )}
                   </button>
                 ))}
-
                 <Divider className="my-2" />
-
-                {/* LOGOUT BUTTON - Adjusted Style */}
-                <button
-                  className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-bold text-red-600 hover:bg-red-50 transition-all"
-                  onClick={handleLogout}
-                >
-                  <MdLogout className="text-xl" />
-                  Logout
+                <button className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-bold text-red-600 hover:bg-red-50 transition-all" onClick={handleLogout}>
+                  <MdLogout className="text-xl" /> Logout
                 </button>
               </nav>
             </div>
@@ -139,43 +138,14 @@ const MyAccount = () => {
               {/* PROFILE TAB */}
               {activeTab === "profile" && (
                 <div className="animate-in fade-in duration-500">
-                  <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Account Details</h2>
-                    <Button
-                      variant="text"
-                      startIcon={<MdEdit />}
-                      sx={{ color: "#691414", fontWeight: "bold", textTransform: "none" }}
-                    >
-                      Edit Profile
-                    </Button>
-                  </div>
-
+                  <h2 className="text-2xl font-bold text-gray-800 mb-8">Account Details</h2>
                   <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <TextField fullWidth label="Full Name" value={user.name} variant="outlined" />
                     <TextField fullWidth label="Email Address" value={user.email} variant="outlined" disabled />
-                    
-                    <Autocomplete
-                      options={countryList}
-                      autoHighlight
-                      getOptionLabel={(option) => option.label}
-                      renderInput={(params) => <TextField {...params} label="Country" />}
-                    />
-
+                    <Autocomplete options={countryList} getOptionLabel={(option) => option.label} renderInput={(params) => <TextField {...params} label="Country" />} />
                     <TextField fullWidth label="Phone Number" value={user.phone} variant="outlined" />
-
                     <div className="md:col-span-2 mt-4">
-                      <Button
-                        variant="contained"
-                        sx={{
-                          backgroundColor: "#691414",
-                          px: 6,
-                          py: 1.5,
-                          fontWeight: "bold",
-                          borderRadius: "8px",
-                          textTransform: "none",
-                          "&:hover": { backgroundColor: "#4a0e0e" },
-                        }}
-                      >
+                      <Button variant="contained" sx={{ backgroundColor: "#691414", px: 6, py: 1.5, fontWeight: "bold", "&:hover": { backgroundColor: "#4a0e0e" } }}>
                         Update Profile
                       </Button>
                     </div>
@@ -183,57 +153,59 @@ const MyAccount = () => {
                 </div>
               )}
 
-              {/* ORDERS TAB */}
-              {activeTab === "orders" && (
-                <div className="animate-in slide-in-from-bottom-4 duration-500">
-                  <div className="text-center py-20">
-                    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <MdShoppingBag className="text-4xl text-gray-300" />
+              {/* CART TAB */}
+              {activeTab === "cart" && (
+                <div className="animate-in fade-in duration-500">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-8">My Shopping Cart</h2>
+                  {cartItems.length === 0 ? (
+                    <div className="text-center py-10 text-gray-400">Your cart is currently empty.</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {cartItems.map((item) => (
+                        <div key={`${item.productId}-${item.size}`} className="flex items-center gap-4 p-4 border rounded-lg">
+                          <img src={item.img} alt={item.name} className="w-16 h-20 object-cover rounded" />
+                          <div className="flex-1">
+                            <h4 className="font-bold text-sm">{item.name}</h4>
+                            <p className="text-xs text-gray-500">Size: {item.size}</p>
+                            <p className="text-[#691414] font-bold">৳{item.price}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                             <button onClick={() => updateQty(item.productId, item.size, -1)} className="px-2 border rounded">-</button>
+                             <span className="text-sm font-bold">{item.qty}</span>
+                             <button onClick={() => updateQty(item.productId, item.size, 1)} className="px-2 border rounded">+</button>
+                          </div>
+                          <Button onClick={() => removeItem(item.productId, item.size)} color="error">Remove</Button>
+                        </div>
+                      ))}
+                      <div className="pt-6 border-t flex justify-between items-center">
+                         <h3 className="text-xl font-bold">Total: ৳{cartItems.reduce((acc, curr) => acc + (curr.price * curr.qty), 0).toLocaleString()}</h3>
+                         <Button variant="contained" sx={{ backgroundColor: "#691414" }} onClick={() => navigate("/checkout")}>Checkout Now</Button>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-800">No Orders Found</h3>
-                    <p className="text-gray-500 mb-8 max-w-xs mx-auto text-sm">
-                      You haven't placed any orders yet.
-                    </p>
-                    <Button
-                      variant="contained"
-                      onClick={() => navigate("/productlisting")}
-                      sx={{
-                        backgroundColor: "#691414",
-                        px: 4,
-                        py: 1.2,
-                        fontWeight: "bold",
-                        textTransform: "none",
-                        "&:hover": { backgroundColor: "#4a0e0e" },
-                      }}
-                    >
-                      Go to Shop
-                    </Button>
-                  </div>
+                  )}
                 </div>
               )}
 
-              {/* ADDRESS TAB */}
-              {activeTab === "address" && (
-                <div className="animate-in fade-in duration-500">
-                  <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Shipping Addresses</h2>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      sx={{ backgroundColor: "#691414", fontWeight: "bold", textTransform: "none" }}
-                    >
-                      + Add New
+              {/* WISHLIST REDIRECT TAB (Optional: Show preview instead of redirect) */}
+              {activeTab === "wishlist" && (
+                <div className="text-center py-20">
+                    <MdFavorite className="text-6xl text-gray-200 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold mb-4">You have {wishlistItems.length} items saved</h3>
+                    <Button variant="contained" sx={{ backgroundColor: "#691414" }} onClick={() => navigate("/wishlist")}>
+                        Go to Wishlist Page
                     </Button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="border border-gray-200 p-5 rounded-xl bg-white shadow-sm relative hover:border-[#691414] transition-all">
-                      <span className="absolute top-4 right-4 text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold uppercase">Default</span>
-                      <h4 className="font-bold text-gray-800 mb-1">Home Address</h4>
-                      <p className="text-xs text-gray-500 leading-relaxed">Dhaka, Bangladesh</p>
-                    </div>
-                  </div>
                 </div>
               )}
+
+              {/* Empty state for Orders */}
+              {activeTab === "orders" && (
+                  <div className="text-center py-20">
+                      <MdShoppingBag className="text-6xl text-gray-200 mx-auto mb-4" />
+                      <h3 className="text-xl font-bold">No orders yet</h3>
+                      <p className="text-gray-400 mt-2">When you buy items, they will appear here.</p>
+                  </div>
+              )}
+
             </div>
           </div>
         </div>

@@ -2,113 +2,77 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { MdOutlineShoppingCart, MdFullscreen } from "react-icons/md";
 import { FaHeart, FaStar } from "react-icons/fa";
+import { useShop } from "../../../Context/ShopContext"; 
+import { useCart } from "../../../Context/CartContext"; // ADDED: Import Cart Context
+import { getImageUrl } from "../../../utils/imageHelper";
 
-const ProductItem = ({ item, view, onViewDetails, onAddToCart, onAddToWishlist }) => {
-  const BACKEND_URL = "http://localhost:5000";
+const ProductItem = ({ item, view, onQuickView }) => {
+  // FIXED: addToCart now comes from useCart() to ensure the drawer opens
+  const { addToWishlist, wishlistItems } = useShop();
+  const { addToCart } = useCart(); 
 
   if (!item) return null;
 
-  /**
-   * ইমেজ পাথ হ্যান্ডলিং ফাংশন:
-   * এটি অটোমেটিক চেক করবে আইটেমটি কি প্রোডাক্ট নাকি স্লাইডার
-   */
-  const getImageUrl = (itemData) => {
-    const path = itemData.imageURL || itemData.image; // স্লাইডার টেবিল হলে 'image' থাকতে পারে
-    
-    if (!path) return "https://placehold.co/300x400?text=No+Image";
-    
-    // ১. যদি সরাসরি পূর্ণাঙ্গ URL থাকে
-    if (path.startsWith("http")) return path;
+  // Check if item is already in wishlist for UI feedback
+  const isIdInWishlist = (id) => 
+    (wishlistItems || []).some(wish => (wish?.productId?._id || wish?.productId || wish?._id) === id);
 
-    // ২. যদি ডাটাবেসে শুধু ফাইলের নাম থাকে (যেমন: Slide1.png)
-    // স্লাইডার এবং প্রোডাক্টের জন্য আলাদা ফোল্ডার থাকলে এখানে লজিক অ্যাড করা যায়
-    const cleanPath = path.startsWith("/") ? path : `/${path}`;
-    
-    // আপনার ব্যাকএন্ডে যদি সব ইমেজ 'uploads' এ থাকে
-    if (!cleanPath.includes("uploads")) {
-        return `${BACKEND_URL}/uploads${cleanPath}`;
+  const handleAction = (e, actionFn, ...args) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof actionFn === 'function') {
+      actionFn(...args);
     }
-
-    return `${BACKEND_URL}${cleanPath}`;
   };
 
   return (
-    <div
-      className={`productItem group bg-white border border-gray-100 overflow-hidden transition-all duration-300 mb-4 rounded-xl
-    ${
-      view === "list"
-        ? "flex flex-row items-start gap-8 p-6 shadow-sm hover:shadow-md"
-        : "flex flex-col hover:shadow-lg"
-    }`}
-    >
+    <div className={`productItem group bg-white border border-gray-100 overflow-hidden transition-all duration-300 mb-4 rounded-xl ${view === "list" ? "flex flex-row items-start gap-8 p-6 shadow-sm hover:shadow-md" : "flex flex-col hover:shadow-lg"}`}>
+      
       {/* IMAGE CONTAINER */}
-      <div
-        className={`imgWrapper relative overflow-hidden bg-[#f9f9f9] shrink-0 flex items-center justify-center
-      ${
-        view === "list"
-          ? "w-[200px] min-h-[250px] py-4 border border-gray-50 rounded-lg"
-          : "w-full aspect-[3/4]"
-      }`}
-      >
+      <div className={`imgWrapper relative overflow-hidden bg-[#f9f9f9] shrink-0 flex items-center justify-center ${view === "list" ? "w-[200px] min-h-[250px] py-4 border border-gray-50 rounded-lg" : "w-full aspect-[3/4]"}`}>
         <Link to={`/product/${item._id}`} className="w-full h-full">
           <img
-            src={getImageUrl(item)}
+            src={getImageUrl(item)} 
             alt={item.name}
-            className={`transition-transform duration-500 group-hover:scale-105
-            ${
-              view === "list"
-                ? "max-h-full w-auto object-contain mx-auto"
-                : "w-full h-full object-cover"
-            }`}
+            className={`transition-transform duration-500 group-hover:scale-105 ${view === "list" ? "max-h-full w-auto object-contain mx-auto" : "w-full h-full object-cover"}`}
+            onError={(e) => { e.target.src = "https://placehold.co/300x400?text=Error"; }}
           />
         </Link>
 
-        {/* স্লাইডার টাইপ হলে কার্ট বাটন হাইড রাখতে পারেন অথবা প্রোডাক্ট টাইপ হলে দেখাতে পারেন */}
+        {/* Hover Actions (Grid View) */}
         {view !== "list" && (
           <div className="absolute top-3 right-[-50px] group-hover:right-3 flex flex-col gap-2 transition-all duration-300 opacity-0 group-hover:opacity-100 z-10">
-            <button
-              onClick={() => onViewDetails && onViewDetails(item)}
-              className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md text-black hover:bg-[#B89B7A] hover:text-white transition-all"
-            >
+            <button onClick={(e) => onQuickView && onQuickView(e, item)} className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md text-black hover:bg-[#B89B7A] hover:text-white transition-all">
               <MdFullscreen size={22} />
             </button>
 
             <button 
-              onClick={() => onAddToWishlist && onAddToWishlist(item)}
-              className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md text-black hover:bg-[#891b1b] hover:text-white transition-all"
+              onClick={(e) => handleAction(e, addToWishlist, item)}
+              className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all ${isIdInWishlist(item._id) ? "bg-[#891b1b] text-white" : "bg-white text-black hover:bg-[#891b1b] hover:text-white"}`}
             >
               <FaHeart size={16} />
             </button>
 
-            {/* শুধুমাত্র স্টোর প্রোডাক্টের জন্য কার্ট বাটন */}
             {item.designType !== 'homeslide' && (
-                <button 
-                onClick={() => onAddToCart && onAddToCart(item)}
+              <button 
+                onClick={(e) => handleAction(e, addToCart, item, 1, item.size || "M")} 
                 className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md text-black hover:bg-[#006a4e] hover:text-white transition-all"
-                >
+              >
                 <MdOutlineShoppingCart size={18} />
-                </button>
+              </button>
             )}
           </div>
         )}
       </div>
 
       {/* TEXT DETAILS */}
-      <div
-        className={`flex-1 flex flex-col ${
-          view === "list" ? "text-left pt-2" : "p-3 text-center"
-        }`}
-      >
+      <div className={`flex-1 flex flex-col ${view === "list" ? "text-left pt-2" : "p-3 text-center"}`}>
         <p className="text-[10px] uppercase tracking-[2px] text-gray-400 font-bold mb-1">
-          {item.category || (item.designType === 'productslide' ? "Featured" : "Heritage")}
+          {item.category || "Collection"}
         </p>
 
         <Link to={`/product/${item._id}`}>
-          <h3
-            className={`font-semibold text-gray-800 mb-2 hover:text-[#891b1b] transition-colors cursor-pointer ${
-              view === "list" ? "text-2xl" : "text-sm truncate"
-            }`}
-          >
+          <h3 className={`font-semibold text-gray-800 mb-2 hover:text-[#891b1b] transition-colors cursor-pointer ${view === "list" ? "text-2xl" : "text-sm truncate"}`}>
             {item.name || "Heritage Wear"}
           </h3>
         </Link>
@@ -116,11 +80,7 @@ const ProductItem = ({ item, view, onViewDetails, onAddToCart, onAddToWishlist }
         {/* RATING */}
         <div className={`flex mb-3 ${view === "list" ? "justify-start" : "justify-center"} gap-1`}>
           {[...Array(5)].map((_, i) => (
-            <FaStar
-              key={i}
-              size={12}
-              className={i < (item.rating || 4) ? "text-yellow-400" : "text-gray-200"}
-            />
+            <FaStar key={i} size={12} className={i < (item.rating || 4) ? "text-yellow-400" : "text-gray-200"} />
           ))}
         </div>
 
@@ -135,13 +95,20 @@ const ProductItem = ({ item, view, onViewDetails, onAddToCart, onAddToWishlist }
         {view === "list" && (
           <div className="flex items-center gap-4 mt-auto pt-6">
             <button 
-              onClick={() => onAddToCart && onAddToCart(item)}
+              onClick={(e) => handleAction(e, addToCart, item, 1, item.size || "M")} 
               className="px-10 py-3 bg-[#891b1b] text-white text-sm font-bold rounded-lg hover:bg-black transition-all flex items-center gap-2"
             >
-              <MdOutlineShoppingCart size={18} />
-              ADD TO CART
+              <MdOutlineShoppingCart size={18} /> ADD TO CART
             </button>
-            {/* অন্যান্য বাটন আগের মতোই থাকবে */}
+            <button onClick={(e) => onQuickView && onQuickView(e, item)} className="p-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-[#B89B7A] hover:text-white transition-all">
+              <MdFullscreen size={22} />
+            </button>
+            <button 
+                onClick={(e) => handleAction(e, addToWishlist, item)} 
+                className={`p-3 rounded-lg transition-all ${isIdInWishlist(item._id) ? "bg-[#891b1b] text-white" : "bg-gray-100 text-gray-700 hover:bg-[#891b1b] hover:text-white"}`}
+            >
+              <FaHeart size={18} />
+            </button>
           </div>
         )}
       </div>

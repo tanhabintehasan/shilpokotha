@@ -4,8 +4,9 @@ import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-route
 // Styles
 import "./App.css";
 
-// Context
+// Contexts - Now using both Shop (Wishlist) and Cart
 import { ShopProvider } from "./Context/ShopContext"; 
+import { CartProvider } from "./Context/CartContext"; // Import your new Cart file
 
 // Components & Pages
 import Header from "./client/components/Header";
@@ -20,6 +21,8 @@ import WishPage from "./client/Pages/WishPage";
 import CheckOut from "./client/Pages/CheckOut";
 import MyAccount from "./client/Pages/MyAccount";
 import MyOrders from "./client/Pages/MyOder";
+
+// Admin Components
 import AdminDashboard from "./admin/components/AdminDashboard";
 import AdminLogin from "./admin/components/AdminLogin";
 
@@ -35,7 +38,9 @@ const ContentWrapper = ({ children }) => {
   return (
     <>
       {!isAdminPath && <Header />}
-      <main className={isAdminPath ? "admin-layout" : "min-h-screen"}>{children}</main>
+      <main className={isAdminPath ? "admin-layout" : "min-h-screen"}>
+        {children}
+      </main>
       {!isAdminPath && (
         <>
           <IconSection />
@@ -48,33 +53,39 @@ const ContentWrapper = ({ children }) => {
 
 function App() {
   return (
-    <ShopProvider> {/* এই লাইনটি আপনার এরর ফিক্স করবে */}
-      <BrowserRouter>
-        <ContentWrapper>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/productlisting" element={<ProductListing />} />
-            <Route path="/products/:category" element={<ProductListing />} />
-            <Route path="/product/:id" element={<ProductDetails />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/wishlist" element={<WishPage />} />
+    // Wrap with ShopProvider first, then CartProvider
+    <ShopProvider> 
+      <CartProvider>
+        <BrowserRouter>
+          <ContentWrapper>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/productlisting" element={<ProductListing />} />
+              <Route path="/products/:category" element={<ProductListing />} />
+              <Route path="/product/:id" element={<ProductDetails />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/wishlist" element={<WishPage />} />
 
-            <Route element={<UserProtectedRoute />}>
-              <Route path="/myaccount" element={<MyAccount />} />
-              <Route path="/myoder" element={<MyOrders />} />
-              <Route path="/checkout" element={<CheckOut />} />
-            </Route>
+              {/* Protected User Routes */}
+              <Route element={<UserProtectedRoute />}>
+                <Route path="/myaccount" element={<MyAccount />} />
+                <Route path="/myoder" element={<MyOrders />} />
+                <Route path="/checkout" element={<CheckOut />} />
+              </Route>
 
-            <Route path="/adminlogin" element={<AdminLogin />} />
-            <Route element={<AdminRoute />}>
-              <Route path="/admindashboard/*" element={<AdminDashboard />} />
-            </Route>
+              {/* Admin Routes */}
+              <Route path="/adminlogin" element={<AdminLogin />} />
+              <Route element={<AdminRoute />}>
+                <Route path="/admindashboard/*" element={<AdminDashboard />} />
+              </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </ContentWrapper>
-      </BrowserRouter>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </ContentWrapper>
+        </BrowserRouter>
+      </CartProvider>
     </ShopProvider>
   );
 }

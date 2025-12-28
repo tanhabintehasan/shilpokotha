@@ -1,4 +1,3 @@
-// models/category.js
 import mongoose from "mongoose";
 
 const categorySchema = new mongoose.Schema({
@@ -10,15 +9,15 @@ const categorySchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// AUTO-GENERATE SLUG BEFORE SAVING
-categorySchema.pre("validate", function (next) {
+// FIX: Using async function WITHOUT the 'next' parameter
+categorySchema.pre("validate", async function () {
   if (this.name) {
     this.slug = this.name
       .toLowerCase()
-      .replace(/\s+/g, "-") // Replace spaces with -
-      .replace(/[^\w-]+/g, ""); // Remove all non-word chars
+      .trim()
+      .replace(/\s+/g, "-") 
+      .replace(/[^\w-]+/g, ""); 
   }
-  next();
 });
 
 export default mongoose.model("Category", categorySchema);

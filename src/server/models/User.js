@@ -2,44 +2,34 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
+    name: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    password: { type: String, required: true },
     role: {
       type: String,
-      enum: ["admin", "customer", "super-admin", "editor"], // Expanded to match your UI
+      enum: ["admin", "customer", "super-admin", "editor"],
       default: "customer",
     },
     status: {
       type: String,
       enum: ["Active", "Inactive", "Banned"],
-      default: "Active", // New users start as Active
+      default: "Active",
     },
-    lastLogin: {
-      type: Date,
-    },
+    avatar: { type: String, default: "" }, // Added for My Account compatibility
+    phone: { type: String, default: "" },  // Added for My Account compatibility
+    lastLogin: { type: Date },
   },
   {
-    timestamps: true, // This automatically provides 'createdAt' (Joined Date) and 'updatedAt'
+    timestamps: true, // Provides createdAt (Joined Date)
+    toJSON: { virtuals: true }, // Ensures virtuals show up in the API response
+    toObject: { virtuals: true }
   }
 );
 
-// Helpful for the Admin Table to see how long ago a user joined
+// Helpful virtual for the Admin Table
 userSchema.virtual("joinedDate").get(function () {
   return this.createdAt;
 });
 
-export default mongoose.model("User", userSchema);
+// FORCE COLLECTION NAME: The 3rd argument 'users' ensures it looks in the correct collection
+export default mongoose.model("User", userSchema, "users");
