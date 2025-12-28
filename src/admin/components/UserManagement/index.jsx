@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-// axiosInstance ব্যবহার করলে আলাদা করে axios ইমপোর্ট করার প্রয়োজন নেই
-import axiosInstance from '../api/axiosInstance'; 
+
+import axiosInstance from '../../../utils/axiosInstance'; 
 import CommonTable from "../Ui/CommonTable";
 import { UserPlus, Shield, User, Mail, Calendar, Loader2 } from "lucide-react";
 
